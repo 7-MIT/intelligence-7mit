@@ -1,6 +1,5 @@
 const API_URL = 'https://lajzrempjyoqkubkumhb.supabase.co/functions/v1/intellegence-7mit-public';
 let aiVersion = null;
-const OPENWEATHER_API_KEY = (window.APP_CONFIG && window.APP_CONFIG.openWeatherKey) || '';
 const SUPABASE_URL = 'https://lajzrempjyoqkubkumhb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_yGZ90Bkv3yreqc9pA55bpw_YKKBhWRw';
 const SESSION_KEY = 'intellegence.7mit.session.v1';
@@ -544,11 +543,11 @@ function needsLiveData(text=''){return /\b(terbaru|terkini|hari ini|sekarang|rea
 function getDeviceLocation(){return new Promise(resolve=>{if(localStorage.getItem(LOCATION_KEY)!=='true'||!navigator.geolocation)return resolve(null);navigator.geolocation.getCurrentPosition(position=>resolve({latitude:Number(position.coords.latitude.toFixed(6)),longitude:Number(position.coords.longitude.toFixed(6))}),()=>resolve(null),{enableHighAccuracy:false,maximumAge:300000,timeout:8000});});}
 async function getWeather(location){
   if(!location)return null;
-  const base={lat:String(location.latitude),lon:String(location.longitude),appid:OPENWEATHER_API_KEY,units:'metric',lang:language==='en'?'en':'id'};
+  const base={lat:String(location.latitude),lon:String(location.longitude),lang:language==='en'?'en':'id'};
   const meteoQuery=new URLSearchParams({latitude:location.latitude,longitude:location.longitude,current:'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m',daily:'weather_code,temperature_2m_max,temperature_2m_min',timezone:'auto',forecast_days:'5'});
   const [currentResult,forecastResult,meteoResult]=await Promise.allSettled([
-    fetch('https://api.openweathermap.org/data/2.5/weather?'+new URLSearchParams(base)),
-    fetch('https://api.openweathermap.org/data/2.5/forecast?'+new URLSearchParams(base)),
+    fetch('/api/weather?'+new URLSearchParams({...base,type:'weather'})),
+    fetch('/api/weather?'+new URLSearchParams({...base,type:'forecast'})),
     fetch('https://api.open-meteo.com/v1/forecast?'+meteoQuery)
   ]);
   const currentResponse=currentResult.status==='fulfilled'?currentResult.value:null,forecastResponse=forecastResult.status==='fulfilled'?forecastResult.value:null,meteoResponse=meteoResult.status==='fulfilled'?meteoResult.value:null;
