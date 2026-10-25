@@ -6,7 +6,7 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   apk:
@@ -40,9 +40,3 @@ jobs:
         with:
           name: intelligence-7mit-apk
           path: dist/intelligence-7mit.apk
-      - name: Publish release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: apk-${{ github.run_number }}
-          name: intelligence.7mit APK #${{ github.run_number }}
-          files: dist/intelligence-7mit.apk

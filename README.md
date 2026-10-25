@@ -34,7 +34,7 @@ Kontak: halo@7mit.org
 APK dibangun otomatis lewat GitHub Actions (`.github/workflows/android-apk.yml`, Capacitor):
 
 1. Buka tab **Actions → Build Android APK → Run workflow**.
-2. Setelah selesai, unduh `intelligence-7mit.apk` dari **Releases** (atau Artifacts pada run tersebut).
+2. Setelah selesai, unduh `intelligence-7mit.apk` dari **Artifacts** pada run tersebut.
 3. Pasang di HP Android. Di Chromebook, aktifkan Google Play / mode pengembang Android lalu pasang APK, atau pasang situs sebagai PWA dari Chrome (menu ⋮ → *Instal intelligence.7mit*).
 
 APK ini bertanda debug (cukup untuk pemasangan manual). Untuk Play Store perlu keystore rilis.
