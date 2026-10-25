@@ -15,7 +15,7 @@ const I18N = {
   id: {
     brandCaption:'Asisten digital 7 MIT', newChat:'Percakapan baru', search:'Cari riwayat', history:'Riwayat',
     settings:'Pengaturan', settingsCaption:'Akun, bahasa, dan data', ready:'AI siap digunakan',
-    emptyTitle:'Mulai dari mana?', emptyCopy:'Tanyakan pelajaran, kembangkan ide, analisis file, atau minta bantuan menulis.',
+    emptyTitle:'Mulai dari <span>mana?</span>', emptyCopy:'Tanyakan pelajaran, kembangkan ide, analisis file, atau minta bantuan menulis.',
     placeholder:'Tanya intelligence.7mit', inputLabel:'Pesan', attach:'Tambahkan file', send:'Kirim pesan',
     privacy:'Jawaban AI dapat keliru. Periksa kembali informasi penting. Histori tersimpan di akunmu.',
     listen:'Dengarkan', stopListening:'Hentikan', copyCode:'Salin kode', previewHtml:'Pratinjau', previewTitle:'Pratinjau HTML', closePreview:'Tutup pratinjau', copiedCode:'Kode disalin', speechUnavailable:'Fitur suara tidak tersedia di browser ini.',
@@ -42,7 +42,7 @@ const I18N = {
   en: {
     brandCaption:'7 MIT digital assistant', newChat:'New conversation', search:'Search history', history:'History',
     settings:'Settings', settingsCaption:'Account, language, and data', ready:'AI is ready',
-    emptyTitle:'Where should we start?', emptyCopy:'Ask about a lesson, develop an idea, analyze a file, or get help with writing.',
+    emptyTitle:'Where should we <span>start?</span>', emptyCopy:'Ask about a lesson, develop an idea, analyze a file, or get help with writing.',
     placeholder:'Ask intelligence.7mit', inputLabel:'Message', attach:'Attach file', send:'Send message',
     privacy:'AI responses can be incorrect. Check important information. History is saved to your account.',
     listen:'Read aloud', stopListening:'Stop reading', copyCode:'Copy code', previewHtml:'Preview', previewTitle:'HTML preview', closePreview:'Close preview', copiedCode:'Code copied', speechUnavailable:'Read aloud is not available in this browser.',

@@ -55,3 +55,15 @@ body{font-family:"DM Sans",system-ui,sans-serif}
 .workspace-nav .study-launch{margin:0!important;border:0!important;background:none!important}
 .workspace-nav .study-launch:hover{background:var(--surface-hover)!important}
 .workspace-nav .study-launch>svg~i{display:none}
+
+/* Chip saran ala Gemini di bawah kolom pesan */
+.empty-state .suggestion-grid{display:flex!important;position:absolute;top:178px;left:50%;transform:translateX(-50%);width:min(664px,calc(100% - 48px));flex-wrap:wrap;justify-content:center;gap:8px;pointer-events:auto}
+.empty-state .suggestion-grid button{display:inline-flex;align-items:center;gap:8px;min-height:0;padding:8px 14px 8px 10px;border:1px solid var(--border);border-radius:999px;background:transparent;color:var(--text);cursor:pointer;font-size:14px}
+.empty-state .suggestion-grid button:hover{background:var(--surface-hover)}
+.empty-state .suggestion-grid button>span:nth-child(2){display:block}
+.empty-state .suggestion-grid .suggestion-icon{display:grid;place-items:center;width:22px;height:22px;background:none!important}
+.empty-state .suggestion-grid .suggestion-icon svg{width:17px;height:17px}
+.empty-state .suggestion-grid strong{font-weight:500}
+@media(max-width:760px){.empty-state .suggestion-grid{top:150px}}
+.sidebar .new-chat.is-current{background:var(--accent-soft)!important}
+.empty-state .suggestion-grid small,.empty-state .suggestion-grid .suggestion-arrow{display:none!important}

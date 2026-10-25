@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const q=s=>document.querySelector(s);
-if(!localStorage.getItem(THEME_KEY))document.body.classList.add('light');
+if(!localStorage.getItem(THEME_KEY)&&matchMedia('(prefers-color-scheme: light)').matches)document.body.classList.add('light');
 function draft(text){els.input.value=text;autoResize();els.input.focus();}
 function openTool(id){window.openStudyTool?.(id);closeSidebar();}
 function library(){window.openStudyLibrary?.();closeSidebar();}
