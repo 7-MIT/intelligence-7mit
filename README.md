@@ -20,7 +20,7 @@ Jalankan dari root repo agar path absolut (`/home.css`, `/vendor/...`) bekerja.
 
 ## Catatan
 
-- Cuaca OpenWeather lewat proxy `functions/api/weather.js` (Cloudflare Pages Functions). Set secret `OPENWEATHER_API_KEY` di dashboard hosting, jangan di repo. Tanpa itu, cuaca memakai Open-Meteo.
+- Hosting: Cloudflare Workers (`wrangler.jsonc`, `src/worker.js`). Cuaca lewat `/api/weather`; set secret `OPENWEATHER_API_KEY` (Settings → Variables and Secrets), jangan di repo. Tanpa itu cuaca memakai Open-Meteo.
 - Layanan AI, login, sinkronisasi akun, dan cuaca membutuhkan backend aktif (tidak disertakan).
 - Untuk domain baru, sesuaikan redirect/origin pada layanan akun.
 - Mode tamu menyimpan data di browser.

@@ -1,0 +1,19 @@
+# Bukan bagian dari situs; jangan disajikan ke publik
+src
+scripts
+assets
+node_modules
+android
+ios
+www
+dist
+.github
+.git
+.gitignore
+.assetsignore
+wrangler.jsonc
+package.json
+package-lock.json
+capacitor.config.json
+README.md
+BACA-DULU.txt

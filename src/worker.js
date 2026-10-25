@@ -1,7 +1,7 @@
-// Proxy OpenWeather: API key disimpan sebagai secret server (OPENWEATHER_API_KEY), tidak pernah dikirim ke browser.
+// Worker: menyajikan aset statis dan proxy cuaca. API key disimpan sebagai secret (OPENWEATHER_API_KEY), tidak pernah dikirim ke browser.
 const ENDPOINTS = { weather: 'weather', forecast: 'forecast' };
 
-export async function onRequestGet({ request, env }) {
+async function weather(request, env) {
   const url = new URL(request.url);
   const type = ENDPOINTS[url.searchParams.get('type')];
   const lat = Number(url.searchParams.get('lat'));
@@ -21,3 +21,11 @@ export async function onRequestGet({ request, env }) {
     headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' }
   });
 }
+
+export default {
+  async fetch(request, env) {
+    const { pathname } = new URL(request.url);
+    if (pathname === '/api/weather' && request.method === 'GET') return weather(request, env);
+    return env.ASSETS.fetch(request);
+  }
+};
