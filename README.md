@@ -24,6 +24,18 @@ Jalankan dari root repo agar path absolut (`/home.css`, `/vendor/...`) bekerja.
 - Layanan AI, login, sinkronisasi akun, dan cuaca membutuhkan backend aktif (tidak disertakan).
 - Untuk domain baru, sesuaikan redirect/origin pada layanan akun.
 - Mode tamu menyimpan data di browser.
+- Aplikasi Android: lihat bagian "APK Android" di bawah.
 - Unggah seluruh isi repo ke root hosting statis; `404.html` dipakai sebagai halaman error.
 
 Kontak: halo@7mit.org
+
+## APK Android (HP & Chromebook)
+
+APK dibangun otomatis lewat GitHub Actions (`.github/workflows/android-apk.yml`, Capacitor):
+
+1. Buka tab **Actions → Build Android APK → Run workflow**.
+2. Setelah selesai, unduh `intelligence-7mit.apk` dari **Releases** (atau Artifacts pada run tersebut).
+3. Pasang di HP Android. Di Chromebook, aktifkan Google Play / mode pengembang Android lalu pasang APK, atau pasang situs sebagai PWA dari Chrome (menu ⋮ → *Instal intelligence.7mit*).
+
+APK ini bertanda debug (cukup untuk pemasangan manual). Untuk Play Store perlu keystore rilis.
+Lokal: `npm install && npm run prepare:www && npx cap add android && npx cap sync android`.

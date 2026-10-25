@@ -1,0 +1,7 @@
+{
+  "appId": "org.mit7.intelligence",
+  "appName": "intelligence.7mit",
+  "webDir": "www",
+  "backgroundColor": "#05070b",
+  "android": { "allowMixedContent": false }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "intelligence-7mit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "intelligence.7mit - aplikasi Android (Capacitor) dari frontend web",
+  "scripts": {
+    "prepare:www": "node scripts/prepare-www.mjs",
+    "android:sync": "npm run prepare:www && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.0",
+    "@capacitor/core": "^7.4.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.4.0"
+  }
+}

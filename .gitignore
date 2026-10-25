@@ -2,3 +2,7 @@
 node_modules/
 *.log
 .env
+node_modules/
+www/
+android/
+dist/
