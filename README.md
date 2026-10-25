@@ -43,3 +43,7 @@ Lokal: `npm install && npm run prepare:www && npx cap add android && npx cap syn
 ## IPA iOS (tanpa tanda tangan)
 
 Workflow `ios-ipa.yml` membangun `.ipa` **tanpa code signing** (artifact di tab Actions). File ini tidak bisa dipasang langsung di iPhone; tanda tangani ulang dengan Apple ID memakai AltStore/Sideloadly, atau pakai akun Apple Developer untuk TestFlight/App Store.
+
+## Sinkronisasi Sites
+
+Frontend diselaraskan dengan intelligence.7mit di Sites pada 25 Oktober 2026. Ilustrasi Siswa interaktif dan perbaikan kolom pesan tetap tersedia. Nilai API key dari ZIP digunakan sebagai secret `OPENWEATHER_API_KEY` pada runtime Sites, tanpa memasukkannya ke kode frontend. Untuk deployment Cloudflare dari repositori ini, atur secret bernama sama pada Worker menggunakan nilai dari ZIP. Secret runtime Sites dan Cloudflare dikelola terpisah.
