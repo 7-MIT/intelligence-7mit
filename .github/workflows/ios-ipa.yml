@@ -1,0 +1,41 @@
+name: Build iOS IPA (unsigned)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ipa:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prepare web assets
+        run: npm run prepare:www
+      - name: Create iOS project
+        run: |
+          npx cap add ios
+          npx @capacitor/assets generate --ios --assetPath assets
+          npx cap sync ios
+      - name: Build (tanpa code signing)
+        working-directory: ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+      - name: Package IPA
+        run: |
+          mkdir -p dist/Payload
+          cp -R ios/App/build/Build/Products/Release-iphoneos/App.app dist/Payload/
+          cd dist && zip -qry intelligence-7mit-unsigned.ipa Payload && rm -rf Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: intelligence-7mit-ipa
+          path: dist/intelligence-7mit-unsigned.ipa

@@ -39,3 +39,7 @@ APK dibangun otomatis lewat GitHub Actions (`.github/workflows/android-apk.yml`,
 
 APK ini bertanda debug (cukup untuk pemasangan manual). Untuk Play Store perlu keystore rilis.
 Lokal: `npm install && npm run prepare:www && npx cap add android && npx cap sync android`.
+
+## IPA iOS (tanpa tanda tangan)
+
+Workflow `ios-ipa.yml` membangun `.ipa` **tanpa code signing** (artifact di tab Actions). File ini tidak bisa dipasang langsung di iPhone; tanda tangani ulang dengan Apple ID memakai AltStore/Sideloadly, atau pakai akun Apple Developer untuk TestFlight/App Store.
