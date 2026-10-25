@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#08111f" />
+  <meta name="description" content="intelligence.7mit — asisten AI untuk belajar, menulis, dan mencari ide." />
+  <title>intelligence.7mit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../study.css?v=1" />
+  <link rel="stylesheet" href="../workspace.css?v=3" />
+  <script type="importmap">{"imports":{"three":"/vendor/three/three.module.min.js"}}</script>
+<link rel="stylesheet" href="../web-controls.css?v=3" />
+<link rel="stylesheet" href="../everyday.css?v=3" />
+<link rel="stylesheet" href="../reference.css?v=5">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Riwayat percakapan">
+      <div class="brand-row">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div>
+          <div class="brand-name">intelligence<span>.7mit</span></div>
+          <div class="brand-caption" id="brandCaption">Asisten digital 7 MIT</div>
+        </div>
+        <button class="icon-button sidebar-search-toggle" id="sidebarSearchToggle" aria-label="Cari percakapan"><i data-icon="search"></i></button><button class="icon-button sidebar-collapse" id="sidebarCollapse" aria-label="Ciutkan sidebar"><i data-icon="panel-left"></i></button><button class="icon-button close-sidebar" id="closeSidebar" aria-label="Tutup menu"><i data-icon="x"></i></button>
+      </div>
+
+      <button class="new-chat" id="newChat">
+        <i data-icon="plus"></i>
+        <span id="newChatLabel">Percakapan baru</span>
+        
+      </button>
+
+      <nav class="workspace-nav" aria-label="Menu utama">
+<button class="nav-item" id="libraryNav"><i data-icon="grid-2x2"></i><span>Pustaka</span></button>
+<button class="nav-item" id="imagesNav"><i data-icon="image"></i><span>Gambar</span></button>
+<button class="nav-item" id="plannerNav"><i data-icon="clock"></i><span>Jadwal & tugas</span></button>
+<button class="nav-item study-launch" id="studyLaunch"><i data-icon="book-open"></i><span>Alat belajar</span></button>
+<button class="nav-item" id="moreNav"><i data-icon="ellipsis"></i><span>Lainnya</span></button>
+</nav><section class="workspace-notebooks"><div class="notebook-heading">Catatan</div><button class="nav-item" id="newNotebook"><i data-icon="plus"></i><span>Catatan baru</span></button><div id="notebookList"></div><button class="nav-item" id="allNotebooks"><i data-icon="ellipsis"></i><span>Semua catatan</span></button></section>
+      <label class="search-box">
+        <i data-icon="search"></i>
+        <input id="searchInput" type="search" placeholder="Cari riwayat" autocomplete="off" />
+      </label>
+
+      <div class="history-heading"><span id="historyHeading">Riwayat</span><span id="historyCount">0 chat</span></div>
+      <nav class="history-list" id="historyList"></nav>
+
+      <div class="sidebar-footer">
+        <button class="profile-button" id="settingsButton">
+          <span class="profile-orb"><i data-icon="settings"></i></span>
+          <span><strong id="settingsLabel">Pengaturan</strong><small id="settingsCaption">Bahasa dan data percakapan</small></span>
+          <i data-icon="chevron-right"></i>
+        </button>
+      </div>
+    </aside>
+
+    <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button menu-button" id="menuButton" aria-label="Buka menu"><i data-icon="panel-left"></i></button>
+          <div class="conversation-title-wrap">
+            <button class="conversation-title" id="conversationTitle" title="Ganti nama percakapan">Percakapan baru</button>
+            <div class="connection"><i></i><span id="connectionLabel">AI siap digunakan</span></div>
+          </div>
+        </div>
+        <div class="top-actions"><button class="study-top-button" id="studyTopLaunch" type="button">Alat belajar</button>
+          <button class="icon-button" id="themeToggle" aria-label="Ubah tema"><i class="moon-icon" data-icon="moon"></i><i class="sun-icon" data-icon="sun"></i></button>
+          <button class="icon-button" id="clearCurrent" aria-label="Hapus percakapan"><i data-icon="trash-2"></i></button>
+        </div>
+      </header>
+      <div class="ai-model-strip" id="aiModelLabel" role="status">AI aktif <strong>intelligence.7mit</strong></div>
+
+      <section class="chat-scroll" id="chatScroll" aria-live="polite">
+        <div class="empty-state" id="emptyState">
+          <div class="ai-emblem"><div class="emblem-core"><i data-icon="sparkles"></i></div><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div></div>
+          <p class="eyebrow">INTELLIGENCE.7MIT</p>
+          <h1 id="emptyTitle">Apa yang ingin kamu <span>jelajahi?</span></h1>
+          <p class="empty-copy" id="emptyCopy">Tanyakan pelajaran, kembangkan ide, atau minta bantuan menulis. Mulai dari salah satu pilihan ini.</p>
+          <div class="suggestion-grid" id="suggestionGrid">
+            <button data-suggestion="weather"><span class="suggestion-icon blue"><i data-icon="cloud-sun"></i></span><span><strong>Cuaca di lokasiku</strong><small>Lihat kondisi dan prakiraan</small></span><i class="suggestion-arrow" data-icon="arrow-up-right"></i></button>
+            <button data-suggestion="news"><span class="suggestion-icon violet"><i data-icon="newspaper"></i></span><span><strong>Berita terbaru</strong><small>Ringkasan informasi terkini</small></span><i class="suggestion-arrow" data-icon="arrow-up-right"></i></button>
+            <button data-suggestion="image"><span class="suggestion-icon cyan"><i data-icon="image"></i></span><span><strong>Buat gambar</strong><small>Hasilkan gambar dari deskripsi</small></span><i class="suggestion-arrow" data-icon="arrow-up-right"></i></button>
+            <button data-suggestion="chart"><span class="suggestion-icon green"><i data-icon="chart-no-axes-column"></i></span><span><strong>Buat grafik</strong><small>Ubah data menjadi visual</small></span><i class="suggestion-arrow" data-icon="arrow-up-right"></i></button>
+            <button data-suggestion="map"><span class="suggestion-icon orange"><i data-icon="map"></i></span><span><strong>Peta Bumi</strong><small>Negara, provinsi, dan kota</small></span><i class="suggestion-arrow" data-icon="arrow-up-right"></i></button>
+            <button data-suggestion="periodic"><span class="suggestion-icon pink"><i data-icon="flask-conical"></i></span><span><strong>Tabel periodik</strong><small>Pelajari setiap unsur</small></span><i class="suggestion-arrow" data-icon="arrow-up-right"></i></button>
+            <button data-suggestion="visual3d"><span class="suggestion-icon violet"><i data-icon="box"></i></span><span><strong>Visual 3D</strong><small>Hewan, atom, dan sains</small></span><i class="suggestion-arrow" data-icon="arrow-up-right"></i></button>
+            <button data-suggestion="quiz"><span class="suggestion-icon blue"><i data-icon="list-checks"></i></span><span><strong>Buat kuis</strong><small>Jawab soal interaktif</small></span><i class="suggestion-arrow" data-icon="arrow-up-right"></i></button>
+          </div>
+        </div>
+        <div class="messages" id="messages"></div>
+      </section>
+
+      <div class="composer-zone">
+        <form class="composer" id="chatForm">
+          <div class="attachment-tray" id="attachmentTray" aria-live="polite"></div>
+          <button class="compose-plus" id="composerPlus" type="button" aria-label="Tambahkan file atau alat" aria-expanded="false" aria-controls="composerMenu"><i data-icon="plus"></i></button>
+          <textarea id="messageInput" rows="1" maxlength="12000" placeholder="Tanya intelligence.7mit" aria-label="Pesan"></textarea>
+          <div class="composer-bottom"><div class="composer-tools">
+            <label class="answer-style"><span class="sr-only">Gaya jawaban</span><select id="answerStyle"><option value="auto">Otomatis</option><option value="steps">Langkah demi langkah</option><option value="hints">Petunjuk saja</option><option value="short">Jawaban singkat</option><option value="quiz">Tanya satu per satu</option><option value="check">Periksa jawabanku</option></select></label>
+            <button class="attach-button" id="voiceInput" type="button" aria-label="Dikte pesan" title="Dikte pesan"><i data-icon="mic"></i></button>
+          </div><button class="send-button" id="sendButton" type="submit" aria-label="Kirim pesan" disabled><i data-icon="arrow-up"></i></button></div>
+          <div class="composer-menu" id="composerMenu" hidden><button id="attachButton" type="button"><i data-icon="paperclip"></i>Unggah file</button><button type="button" id="composerStudy"><i data-icon="book-open"></i>Alat &amp; fitur</button><button type="button" id="composerImage"><i data-icon="image"></i>Buat gambar</button><button type="button" id="composerNotes"><i data-icon="file-text"></i>Catatan</button></div>
+          <input id="fileInput" type="file" multiple hidden accept="image/*,audio/*,video/*,.pdf,.txt,.md,.csv,.json,.html,.css,.js,.xml,.rtf" />
+        </form>
+        <div class="workspace-tabs" aria-label="Ruang kerja"><button class="active" id="chatWorkspace" type="button">Chat</button><button id="taskWorkspace" type="button">Tugas</button></div>
+        <p class="privacy-note" id="privacyNote">Jawaban AI dapat keliru. Periksa kembali informasi penting. Histori tersimpan di akunmu.</p>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <dialog id="htmlPreviewDialog" class="modal html-preview-modal" aria-labelledby="htmlPreviewTitle">
+    <form method="dialog" class="html-preview-form">
+      <div class="modal-head"><div><h2 id="htmlPreviewTitle">Pratinjau HTML</h2><p id="htmlPreviewCopy">Pratinjau ini berjalan di bingkai terpisah.</p></div><button class="icon-button" id="closeHtmlPreview" value="cancel" aria-label="Tutup pratinjau"><i data-icon="x"></i></button></div>
+      <iframe id="htmlPreviewFrame" title="Pratinjau kode HTML" sandbox="allow-scripts"></iframe>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="modal">
+    <form method="dialog">
+      <div class="modal-head"><div><h2>Data percakapan</h2><p>Kelola riwayat yang tersimpan di perangkat ini.</p></div><button class="icon-button" value="cancel" aria-label="Tutup"><i data-icon="x"></i></button></div>
+      <div class="storage-card"><span class="storage-icon"><i data-icon="hard-drive"></i></span><div><strong>Penyimpanan lokal aktif</strong><small id="storageSummary">Belum ada percakapan tersimpan</small></div></div>
+      <button class="danger-action" id="clearAllButton" type="button"><span>Hapus semua riwayat</span><i data-icon="trash-2"></i></button>
+    </form>
+  </dialog>
+
+  <script src="../config.js"></script>
+<script src="../app.js?v=workspace-4"></script>
+<script src="../study.js?v=workspace-4"></script>
+<script src="../workspace.js?v=4"></script><script type="module" src="../three-scenes.js?v=3"></script>
+<script src="../everyday.js?v=4"></script><script src="../web-controls.js?v=3"></script>
+<script src="../reference.js?v=5"></script>
+</body>
+</html>

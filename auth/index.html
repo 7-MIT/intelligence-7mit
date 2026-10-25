@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070b13">
+  <meta name="description" content="Masuk atau buat akun intelligence.7mit"><title>Masuk — intelligence.7mit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/auth.css">
+<link rel="stylesheet" href="../web-controls.css?v=3" />
+</head>
+<body>
+  <main class="auth-shell">
+    <section class="auth-story">
+      <a class="auth-brand" href="/"><span class="brand-mark"><i></i><i></i><i></i></span><strong>intelligence<span>.7mit</span></strong></a>
+      <div class="story-copy"><p>RUANG PRIBADIMU</p><h1>Lanjutkan ide dari perangkat mana pun.</h1><span>Semua histori percakapan tersimpan aman di akunmu dan tetap terpisah dari pengguna lain.</span></div>
+      <div class="story-card"><i data-icon="shield-check"></i><div><strong>Histori milikmu</strong><small>Hanya kamu yang dapat membuka percakapan pada akun ini.</small></div></div>
+    </section>
+    <section class="auth-panel">
+      <a class="mobile-brand auth-brand" href="/"><span class="brand-mark"><i></i><i></i><i></i></span><strong>intelligence<span>.7mit</span></strong></a>
+      <div class="auth-box">
+        <a class="back-home" href="/"><i data-icon="arrow-left"></i> Kembali ke beranda</a>
+        <h2 id="authTitle">Selamat datang kembali</h2><p class="auth-copy" id="authCopy">Masuk untuk melanjutkan percakapanmu.</p>
+        <div class="auth-tabs" role="tablist"><button class="active" data-tab="login" role="tab">Masuk</button><button data-tab="signup" role="tab">Daftar</button></div>
+        <form id="emailForm">
+          <label><span>Email</span><div class="field"><i data-icon="mail"></i><input id="email" type="email" autocomplete="email" placeholder="nama@email.com" required></div></label>
+          <label><span class="password-label"><span>Password</span><button id="forgotPassword" type="button">Lupa password?</button></span><div class="field"><i data-icon="lock-keyhole"></i><input id="password" type="password" autocomplete="current-password" minlength="8" placeholder="Minimal 8 karakter" required><button class="show-password" type="button" aria-label="Tampilkan password"><i data-icon="eye"></i></button></div></label>
+          <button class="submit-button" id="emailSubmit" type="submit"><span>Masuk</span><i data-icon="arrow-right"></i></button>
+        </form>
+        <div class="divider"><span>atau</span></div>
+        <button class="sso-button" id="openSso" type="button"><span class="sso-mark">7</span><span>Masuk menggunakan <strong>akun.7mit</strong></span><i data-icon="chevron-right"></i></button>
+        <button class="guest-button" id="guestLogin" type="button"><i data-icon="user-round"></i><span><strong>Masuk sebagai Tamu</strong><small>Histori hanya tersimpan di perangkat ini</small></span><i data-icon="arrow-right"></i></button>
+        <p class="auth-terms">Dengan melanjutkan, kamu menyetujui penggunaan data akun untuk menyimpan histori percakapanmu.</p>
+        <div class="auth-status" id="authStatus" role="status"></div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="ssoDialog">
+    <form id="ssoForm">
+      <div class="dialog-head"><div><span class="sso-mark">7</span><div><h3>Masuk dengan akun.7mit</h3><p>Gunakan username dan password akun.7mit milikmu.</p></div></div><button type="button" id="closeSso" aria-label="Tutup"><i data-icon="x"></i></button></div>
+      <div id="ssoCredentials">
+        <label><span>Username akun.7mit</span><div class="field"><i data-icon="user"></i><input id="ssoUsername" autocomplete="username" required></div></label>
+        <label><span>Password akun.7mit</span><div class="field"><i data-icon="lock-keyhole"></i><input id="ssoPassword" type="password" autocomplete="current-password" required></div></label>
+      </div>
+      <div class="account-choices" id="accountChoices"></div>
+      <button class="submit-button" id="ssoSubmit" type="submit"><span>Masuk</span><i data-icon="arrow-right"></i></button>
+      <div class="auth-status" id="ssoStatus" role="status"></div>
+    </form>
+  </dialog>
+  <dialog id="resetDialog"><form id="resetForm">
+    <div class="dialog-head"><div><span class="dialog-icon"><i data-icon="key-round"></i></span><div><h3>Reset password</h3><p>Kami akan mengirim tautan pemulihan ke emailmu.</p></div></div><button type="button" id="closeReset" aria-label="Tutup"><i data-icon="x"></i></button></div>
+    <label><span>Email akun</span><div class="field"><i data-icon="mail"></i><input id="resetEmail" type="email" autocomplete="email" placeholder="nama@email.com" required></div></label>
+    <button class="submit-button" id="resetSubmit" type="submit"><span>Kirim tautan reset</span><i data-icon="send"></i></button><div class="auth-status" id="resetStatus" role="status"></div>
+  </form></dialog>
+  <dialog id="changePasswordDialog"><form id="changePasswordForm">
+    <div class="dialog-head"><div><span class="dialog-icon"><i data-icon="key-round"></i></span><div><h3>Ganti password</h3><p>Buat password baru untuk akunmu.</p></div></div></div>
+    <label><span>Password baru</span><div class="field"><i data-icon="lock-keyhole"></i><input id="newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Minimal 8 karakter" required></div></label>
+    <label><span>Ulangi password baru</span><div class="field"><i data-icon="lock-keyhole"></i><input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Ketik ulang password" required></div></label>
+    <p class="password-hint">Gunakan minimal 8 karakter.</p><button class="submit-button" id="changePasswordSubmit" type="submit"><span>Ganti password</span><i data-icon="arrow-right"></i></button><div class="auth-status" id="changePasswordStatus" role="status"></div>
+  </form></dialog>
+  <dialog id="confirmedDialog" class="success-dialog"><div class="success-dialog-body"><span class="success-icon"><i data-icon="circle-check"></i></span><h3 id="successTitle">Akun Anda telah dikonfirmasi dan telah aktif.</h3><p id="successCopy">Silakan lanjutkan untuk mulai menggunakan intelligence.7mit.</p><button class="submit-button" id="successContinue" type="button"><span>Lanjutkan ke chat</span><i data-icon="arrow-right"></i></button></div></dialog>
+  <script src="/auth.js"></script>
+<script src="../web-controls.js?v=3"></script>
+</body>
+</html>

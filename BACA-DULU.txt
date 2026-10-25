@@ -1,0 +1,18 @@
+intelligence.7mit - Ekspor website versi 22
+
+Isi paket: seluruh frontend HTML, CSS, JavaScript, aset, dan Three.js.
+Halaman awal: index.html
+Aplikasi chat: chat/index.html
+Pengaturan: chat/pengaturan/index.html
+Login: auth/index.html
+
+Menjalankan secara lokal:
+1. Ekstrak semua isi ZIP ke satu folder.
+2. Buka terminal di folder tersebut.
+3. Jalankan: python3 -m http.server 8000
+4. Buka http://localhost:8000/ untuk homepage atau http://localhost:8000/chat/ untuk aplikasi.
+
+Unggah seluruh isi folder ke root hosting statis agar rute dan aset berfungsi.
+Paket ini adalah frontend. Layanan AI, login, sinkronisasi akun, cuaca, serta font eksternal memerlukan internet dan backend yang aktif. Backend serta konfigurasi server tidak disertakan. Untuk login melalui domain baru, konfigurasi redirect dan origin mungkin perlu disesuaikan pada layanan akun.
+Data percakapan pengguna dan sesi login tidak disertakan. Mode tamu menyimpan data di browser perangkat yang digunakan.
+Kontak resmi: halo@7mit.org (Email/iMessage).

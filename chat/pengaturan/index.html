@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#08111f" />
+  <meta name="description" content="Pengaturan intelligence.7mit" />
+  <title>Pengaturan — intelligence.7mit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+<link rel="stylesheet" href="../../web-controls.css?v=3" />
+</head>
+<body class="settings-page">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <main class="settings-shell">
+    <header class="settings-topbar">
+      <a href="/chat/" class="settings-back" id="backLink"><i data-icon="chevron-left"></i><span>Kembali ke chat</span></a>
+      <div class="settings-brand"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div><strong>intelligence<span>.7mit</span></strong></div>
+    </header>
+    <div class="settings-content">
+      <div class="settings-intro"><p>INTELLIGENCE.7MIT</p><h1 id="pageTitle">Pengaturan</h1><span id="pageCopy">Atur bahasa antarmuka dan data percakapan di perangkat ini.</span></div>
+
+      <section class="settings-section" aria-labelledby="accountTitle">
+        <div class="settings-section-icon"><i data-icon="user-round"></i></div>
+        <div class="settings-section-body">
+          <h2 id="accountTitle">Akun</h2><p id="accountCopy">Histori percakapan disimpan pada akun yang sedang aktif.</p>
+          <div class="account-settings-row"><div class="account-avatar" id="accountAvatar">A</div><div><strong id="accountName">Memuat…</strong><small id="accountIdentity"></small></div><button id="signOutButton" type="button"><i data-icon="log-out"></i><span>Keluar</span></button></div>
+        </div>
+      </section>
+
+      <section class="settings-section" aria-labelledby="languageTitle">
+        <div class="settings-section-icon"><i data-icon="languages"></i></div>
+        <div class="settings-section-body">
+          <h2 id="languageTitle">Bahasa antarmuka</h2><p id="languageCopy">Pilih bahasa yang digunakan pada menu dan tombol.</p>
+          <div class="language-options">
+            <label><input type="radio" name="language" value="id"><span><b>Indonesia</b><small>Bahasa Indonesia</small></span><i data-icon="circle-check"></i></label>
+            <label><input type="radio" name="language" value="en"><span><b>English</b><small>English</small></span><i data-icon="circle-check"></i></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section" aria-labelledby="locationTitle">
+        <div class="settings-section-icon"><i data-icon="map-pin"></i></div>
+        <div class="settings-section-body">
+          <h2 id="locationTitle">Lokasi perangkat</h2><p id="locationCopy">Izinkan lokasi saat kamu meminta cuaca atau informasi sekitar.</p>
+          <div class="data-row location-row"><div><strong id="locationLabel">Akses lokasi</strong><small id="locationStatus">Lokasi belum diizinkan</small></div><button id="locationButton" class="location-button" type="button"><i data-icon="map-pin"></i><span>Izinkan lokasi</span></button></div>
+        </div>
+      </section>
+
+      <section class="settings-section" aria-labelledby="dataTitle">
+        <div class="settings-section-icon"><i data-icon="hard-drive"></i></div>
+        <div class="settings-section-body">
+          <h2 id="dataTitle">Data percakapan</h2><p id="dataCopy">Histori chat tersimpan di akun dan dapat dibuka dari perangkat lain.</p>
+          <div class="data-row"><div><strong id="historyLabel">Riwayat tersimpan</strong><small id="historySummary">Memuat…</small></div><button id="clearHistory" type="button"><i data-icon="trash-2"></i><span>Hapus semua</span></button></div>
+        </div>
+      </section>
+      <p class="saved-indicator" id="savedIndicator" role="status"><i data-icon="circle-check"></i><span>Pengaturan tersimpan otomatis</span></p>
+    </div>
+  </main>
+  <script src="../../settings.js"></script>
+<script src="../../web-controls.js?v=3"></script>
+</body>
+</html>
