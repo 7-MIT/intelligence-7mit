@@ -1,0 +1,57 @@
+/* Antarmuka bergaya asisten AI modern (ala ChatGPT / Gemini). Dimuat terakhir agar menimpa gaya dasar. */
+:root{--bg:#131314;--sidebar:#1e1f20;--panel:#131314;--surface:#1e1f20;--surface-2:#282a2c;--surface-hover:#333537;--text:#e3e3e3;--muted:#a8abb0;--faint:#757a80;--border:rgba(255,255,255,.09);--accent:#8ab4f8;--accent-soft:rgba(138,180,248,.14)}
+body.light{--bg:#fff;--sidebar:#f0f4f9;--panel:#fff;--surface:#f0f4f9;--surface-2:#e9eef6;--surface-hover:#dde3ea;--text:#1f1f1f;--muted:#5f6368;--faint:#80868b;--border:rgba(0,0,0,.09);--accent:#0b57d0;--accent-soft:rgba(11,87,208,.1)}
+body{font-family:"DM Sans",system-ui,sans-serif}
+.ambient,.ai-emblem,.ai-model-strip,.brand-caption{display:none!important}
+
+/* Sidebar */
+.sidebar{background:var(--sidebar);border-right:0;backdrop-filter:none}
+.brand-row{padding-bottom:14px}
+.brand-mark{box-shadow:none}
+.sidebar .new-chat{width:auto;align-self:flex-start;padding:11px 18px;border:0!important;border-radius:999px;background:var(--surface-2)!important;color:var(--text)!important;box-shadow:none}
+.sidebar .new-chat:hover{background:var(--surface-hover)!important;transform:none;box-shadow:none}
+.nav-item,.history-item{border-radius:999px!important;border-color:transparent!important}
+.nav-item:hover,.history-item:hover{background:var(--surface-hover)!important}
+.history-item.active{background:var(--accent-soft)!important;color:var(--text)!important}
+.search-box{border:0;border-radius:999px;background:var(--surface-2)}
+.history-heading{text-transform:none;letter-spacing:0;font-weight:600}
+.profile-button{border-radius:999px}
+
+/* Topbar */
+.main-panel{background:var(--bg)!important}
+.topbar{height:60px;border-bottom:0;background:transparent;backdrop-filter:none}
+.conversation-title{font-size:16px;font-weight:500;padding:8px 12px;border-radius:999px}
+.conversation-title:hover{background:var(--surface-hover)}
+.connection{display:none}
+.study-top-button{border-radius:999px}
+
+/* Layar awal (tata letak tengah dari workspace.css): sapaan bergradien ala Gemini */
+.empty-state h1{font-weight:500;color:var(--text)}
+.empty-state h1 span{background:linear-gradient(90deg,#4285f4,#9b72cb 55%,#d96570)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;font-weight:600}
+
+/* Pesan: jawaban AI tanpa gelembung, pesan pengguna berupa pil */
+.messages{width:min(780px,calc(100% - 32px))}
+.message-meta{display:none}
+.message.assistant .message-content{background:transparent!important;border:0!important;box-shadow:none!important;padding:4px 0!important;font-size:16px;line-height:1.75}
+.message.user .message-content{border:0!important;border-radius:22px!important;background:var(--surface-2)!important;color:var(--text)!important;padding:12px 18px}
+.message.user .avatar{display:none}
+.message.user{grid-template-columns:minmax(0,1fr)}
+.message{margin-bottom:26px}
+
+/* Kolom pesan berbentuk kapsul */
+.composer-zone{background:linear-gradient(0deg,var(--bg) 60%,transparent)}
+.composer{width:min(780px,100%);border:0!important;border-radius:28px;background:var(--surface-2)!important;box-shadow:none!important;backdrop-filter:none}
+.composer:focus-within{background:var(--surface-hover)!important}
+.composer textarea{font-size:16px}
+.send-button{border-radius:50%;background:var(--text)!important;color:var(--bg)!important;box-shadow:none}
+.send-button:disabled{background:var(--surface-hover)!important;color:var(--faint)!important}
+.compose-plus{border-radius:50%}
+.privacy-note{color:var(--faint);font-size:12px}
+.workspace-tabs{display:none}
+@media(max-width:760px){.empty-state{padding:0 4px 8vh}.topbar{padding:0 10px}}
+.workspace-nav .study-launch>span:not(:last-child){display:none}
+.nav-item i,.nav-item svg{flex:0 0 auto}
+.sidebar .new-chat.is-current,.sidebar .new-chat:hover,.workspace-nav .nav-item.is-current{background:var(--surface-hover)!important;color:var(--text)!important}
+.workspace-nav .study-launch{margin:0!important;border:0!important;background:none!important}
+.workspace-nav .study-launch:hover{background:var(--surface-hover)!important}
+.workspace-nav .study-launch>svg~i{display:none}
