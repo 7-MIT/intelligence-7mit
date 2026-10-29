@@ -125,7 +125,7 @@ export class OpenAICompatProvider implements LLMProvider {
 
 /** Adapter backend intelligence.7mit yang sudah ada (Supabase Edge Function). Hanya teks; tanpa tool calling/vision. */
 export class SevenMitProvider implements LLMProvider {
-  constructor(public config: ProviderConfig, private anonKey: string, private fetchImpl: typeof fetch = fetch) {}
+  constructor(public config: ProviderConfig, private anonKey: string, private fetchImpl: typeof fetch = fetch, private session: { token: () => Promise<string | undefined>; context: () => Record<string, unknown> } = { token: async () => undefined, context: () => ({ mode: 'guest' }) }) {}
   capabilities() { return capabilitiesOf(this.config); }
 
   async chat(req: LLMRequest): Promise<LLMResponse> {
@@ -138,8 +138,8 @@ export class SevenMitProvider implements LLMProvider {
     try {
       res = await this.fetchImpl(this.config.baseUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.anonKey}` },
-        body: JSON.stringify({ message: text(last), prompt: text(last), history, messages: history, attachments: [], mode: 'chat', account_context: { mode: 'guest' } }),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(await this.session.token()) ?? this.anonKey}` },
+        body: JSON.stringify({ message: text(last), prompt: text(last), history, messages: history, attachments: [], mode: 'chat', account_context: this.session.context() }),
         signal: req.signal
       });
     } catch (e) {

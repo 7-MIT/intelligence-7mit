@@ -9,6 +9,7 @@ import { HistoryPage } from '@/pages/HistoryPage';
 import { PermissionsPage } from '@/pages/PermissionsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { Logo, Modal } from '@/components/ui';
+import { AuthGate } from '@/components/AuthGate';
 
 const PAGES = { chat: ChatPage, code: CodePage, permissions: PermissionsPage, history: HistoryPage, settings: SettingsPage };
 
@@ -36,9 +37,11 @@ export default function App() {
   const ready = store.use((s) => s.ready);
   const page = store.use((s) => s.page);
   const toasts = store.use((s) => s.toasts);
+  const auth = store.use((s) => s.auth);
   useEffect(() => { void init(); }, []);
   if (!ready) return <div className="empty" style={{ height: '100%' }}><div><Logo size={56} /><p>Memuat…</p></div></div>;
   const Page = PAGES[page];
+  if (auth?.status === 'none') return <><AuthGate /><div className="toasts" aria-live="polite">{toasts.map((t) => <div key={t.id} className={`toast ${t.kind}`}>{t.text}</div>)}</div></>;
   return (
     <div className="app">
       <Sidebar />

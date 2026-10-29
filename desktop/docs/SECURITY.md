@@ -34,6 +34,8 @@ Konten dari web, berkas, output terminal, judul jendela, dan memori **dibungkus*
 
 ## Data sensitif
 
+- Login: kata sandi hanya melewati IPC sekali ke proses utama lalu dikirim ke Supabase; tidak disimpan. Token sesi terenkripsi OS, di-refresh otomatis, dan dihapus saat keluar. Backend bawaan memakai token akun bila login (kunci publishable web bila tamu).
+
 - API key: `safeStorage` (Keychain/DPAPI/libsecret); bila enkripsi OS tidak tersedia, key hanya di **memori** sesi dan UI memberi tahu. Tidak pernah ke renderer/log/berkas teks biasa (diuji E2E).
 - **Screenshot hanya dikirim ke penyedia AI bila Anda mengaktifkan "Izinkan kirim screenshot"**, dan Control menolak mulai tanpanya. Pratinjau layar di UI bersifat lokal. Pengguna menentukan penyedia mana yang menerima data.
 - Browser Web: konteks Playwright baru, tidak persisten, tanpa cookie/login Anda; hanya `http(s)`; alamat metadata cloud diblokir.

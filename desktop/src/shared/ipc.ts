@@ -81,6 +81,9 @@ export const schemas = {
   termStart: z.object({ workspaceId: id }).strict(),
   termWrite: z.object({ id, data: z.string().max(10_000) }).strict(),
   externalUrl: z.object({ url: z.string().url().max(2000) }).strict(),
+  authEmail: z.object({ email: z.string().email().max(254), password: z.string().min(6).max(200) }).strict(),
+  authRecover: z.object({ email: z.string().email().max(254) }).strict(),
+  authSso: z.object({ username: z.string().min(1).max(120), password: z.string().min(1).max(200), accountKey: z.string().max(200).optional() }).strict(),
   taskTimeline: z.object({ id }).strict()
 };
 

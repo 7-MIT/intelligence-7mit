@@ -50,6 +50,7 @@ const run = (cmd, args) => new Promise((res, rej) => { const p = spawn(cmd, args
 
 // Izin diseed langsung ke berkas (build terpasang tidak memakai hook uji, dialog konfirmasi native tetap aktif).
 fs.writeFileSync(path.join(userData, 'permissions.json'), JSON.stringify({ grants: { screen: true, input: true, terminal: false, filesystem: false, browser: false, apps: true }, mode: 'ask', allowedFolders: [], autoWorkspaces: [], allowScreenshotUpload: true }));
+fs.writeFileSync(path.join(userData, 'auth.json'), JSON.stringify({ guest: true, profile: { display_name: 'Tamu', provider: 'guest' } }));
 const app = await electron.launch({ ...(process.env.IT7_APP_EXE ? { executablePath: process.env.IT7_APP_EXE } : {}), args: [...(process.env.IT7_APP_EXE ? [] : ['.']), '--no-sandbox', `--user-data-dir=${userData}`], env: { ...process.env, IT7_E2E: '1' } });
 const page = await app.firstWindow();
 try {

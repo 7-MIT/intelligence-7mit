@@ -21,6 +21,8 @@ const api = {
   git: { status: invoke(CH.gitStatus), diff: invoke(CH.gitDiff), commit: invoke(CH.gitCommit) },
   term: { start: invoke(CH.termStart), write: invoke(CH.termWrite), kill: invoke(CH.termKill), onData: (cb: (p: { id: string; data: string }) => void) => on(CH.termData, cb) },
   browser: { state: invoke(CH.browserState), navigate: invoke(CH.browserNavigate), close: invoke(CH.browserClose) },
+  auth: { status: invoke(CH.authStatus), signIn: invoke(CH.authSignIn), signUp: invoke(CH.authSignUp), recover: invoke(CH.authRecover), sso: invoke(CH.authSso), signOut: invoke(CH.authSignOut), guest: invoke(CH.authGuest) },
+  history: { sync: invoke(CH.historySync) },
   audit: { list: invoke(CH.auditList), export: invoke(CH.auditExport) },
   onAgentEvent: (cb: (e: unknown) => void) => on(CH.agentEvent, cb),
   onNavigate: (cb: (page: string) => void) => on(CH.navigate, cb)

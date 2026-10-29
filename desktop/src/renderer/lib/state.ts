@@ -3,7 +3,7 @@ import type {
 } from '@shared/types';
 import { DEFAULT_PERMISSIONS, DEFAULT_SETTINGS } from '@shared/types';
 import type { TaskStartInput } from '@shared/ipc';
-import { api, errMsg } from './api';
+import { api, errMsg, type AuthState } from './api';
 import { createStore } from './mini-store';
 
 export type Page = 'chat' | 'code' | 'permissions' | 'history' | 'settings';
@@ -39,12 +39,13 @@ export interface AppState {
   panelOpen: boolean;
   panelTab: PanelTab;
   sidebarOpen: boolean;
+  auth: AuthState | null;
 }
 
 export const store = createStore<AppState>({
   ready: false, page: 'chat', settings: DEFAULT_SETTINGS, permissions: DEFAULT_PERMISSIONS, providers: [], workspaces: [], convList: [], conv: null,
   streams: {}, tasks: {}, taskConv: {}, timelines: {}, plans: {}, approvals: [], frame: null, target: null, browserFrame: null, capture: { active: false },
-  toasts: [], system: null, info: null, submode: 'agent', caps: { web: false, computer: false }, panelOpen: false, panelTab: 'files', sidebarOpen: true
+  toasts: [], system: null, info: null, submode: 'agent', caps: { web: false, computer: false }, panelOpen: false, panelTab: 'files', sidebarOpen: true, auth: null
 });
 
 const uid = () => crypto.randomUUID();
@@ -96,6 +97,9 @@ export async function init() {
   store.set({ tasks: Object.fromEntries((tasks ?? []).map((t) => [t.id, t])), taskConv: Object.fromEntries((tasks ?? []).filter((t) => t.conversationId).map((t) => [t.id, t.conversationId!])), ready: true });
   off?.();
   off = api.onAgentEvent((e) => handleEvent(e as AgentEvent));
+  const auth = await api.auth.status();
+  store.set({ auth: auth ?? { status: 'none' } });
+  if (auth?.status === 'user') void syncHistory(true);
   if (store.get().info?.crashed) toast('info', 'Aplikasi dipulihkan setelah penutupan tidak normal. Percakapan Anda aman; task yang berjalan sebelumnya tidak dilanjutkan.');
   const last = (await api.conv.list())?.[0];
   if (last) {
@@ -147,6 +151,21 @@ export function handleEvent(e: AgentEvent) {
     case 'browser_frame': store.set((s) => ({ browserFrame: e.dataUrl, ...(s.browserFrame ? {} : { panelOpen: true, panelTab: 'browser' as PanelTab }) })); break;
     case 'capture_status': store.set({ capture: { active: e.active, reason: e.reason } }); break;
   }
+}
+
+export async function syncHistory(silent = false) {
+  try {
+    const r = await api.history.sync();
+    store.set({ convList: (await api.conv.list()) ?? [] });
+    if (!silent) toast('success', `Riwayat disinkronkan (${r?.pulled ?? 0} diterima, ${r?.pushed ?? 0} dikirim)`);
+  } catch (e) { toast('error', errMsg(e)); }
+}
+/** Dipanggil setelah login berhasil: perbarui status, daftar percakapan, dan pesan sinkron. */
+export async function onSignedIn(state: AuthState, syncError?: string) {
+  store.set({ auth: state, conv: null });
+  store.set({ convList: (await api.conv.list()) ?? [] });
+  if (syncError) toast('error', syncError);
+  else toast('success', state.profile?.provider === 'guest' ? 'Mode tamu' : `Masuk sebagai ${state.profile?.display_name ?? state.email ?? 'akun'}`);
 }
 
 export function setPage(page: Page) { store.set({ page }); }

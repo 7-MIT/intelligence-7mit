@@ -24,6 +24,7 @@ export function Sidebar() {
   const approvals = store.use((s) => s.approvals);
   const workspaces = store.use((s) => s.workspaces);
   const info = store.use((s) => s.info);
+  const auth = store.use((s) => s.auth);
   const [q, setQ] = useState('');
   const [hits, setHits] = useState<{ id: string; title: string; snippet: string }[] | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string; title: string } | null>(null);
@@ -83,6 +84,7 @@ export function Sidebar() {
         ))}
       </div>
       <div className="sb-foot">
+        <button className="userchip" onClick={() => setPage('settings')} aria-label="Akun"><span className="av">{(auth?.profile?.display_name ?? '?')[0]?.toUpperCase()}</span><span style={{ minWidth: 0 }}><b style={{ fontSize: '.86rem' }}>{auth?.profile?.display_name ?? 'Akun'}</b><small>{auth?.status === 'user' ? auth.email ?? (auth.profile?.provider === 'akun7mit' ? 'akun.7mit' : 'Tersinkron') : 'Tamu · hanya di perangkat ini'}</small></span></button>
         <button className={`stop-all ${running ? 'live' : ''}`} onClick={stopAll} aria-label="Stop AI sekarang"><Square size={13} fill="currentColor" />Stop AI{approvals.length ? ` (${approvals.length} menunggu)` : ''}</button>
         <button className={`sb-item ${page === 'permissions' ? 'on' : ''}`} onClick={() => setPage('permissions')}><ShieldCheck size={16} />Permission Center</button>
         <button className={`sb-item ${page === 'history' ? 'on' : ''}`} onClick={() => setPage('history')}><History size={16} />Riwayat & Audit</button>
