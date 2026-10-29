@@ -126,7 +126,7 @@ input, textarea, select { font: inherit; color: inherit; }
 
 /* Composer */
 .composer { padding: 6px 24px 16px; }
-.composer-box { max-width: 780px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line2); border-radius: 22px; padding: 10px 12px 8px; box-shadow: 0 6px 24px rgba(0,0,0,.18); transition: border-color .15s, box-shadow .15s; }
+.composer-box { container: composer / inline-size; max-width: 780px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line2); border-radius: 22px; padding: 10px 12px 8px; box-shadow: 0 6px 24px rgba(0,0,0,.18); transition: border-color .15s, box-shadow .15s; }
 .composer-box:focus-within, .composer-box.drop { border-color: rgba(122,162,255,.55); box-shadow: 0 6px 28px rgba(0,0,0,.22), 0 0 0 3px var(--accent-soft); }
 .composer textarea { width: 100%; border: 0; outline: none; background: none; resize: none; max-height: 240px; padding: 4px 4px; line-height: 1.55; }
 .composer-bar { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; min-width: 0; } .composer-bar .dd-btn span { max-width: 112px; }
@@ -176,3 +176,5 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: .84rem; } .tbl th
 .spin { animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 1100px) { .rpanel { position: absolute; right: 0; top: 0; bottom: 0; z-index: 20; width: min(92%, 640px); box-shadow: var(--shadow); } .code-split { position: relative; } }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+.send { flex: none; } .composer-bar > * { min-width: 0; } .composer-bar .dd, .composer-bar .pill, .composer-bar .icon-btn { flex: none; }
+@container composer (max-width: 560px) { .composer-bar .pt { display: none; } .composer-bar .dd-btn span { max-width: 78px; } .pill { padding: 5px 8px; } }

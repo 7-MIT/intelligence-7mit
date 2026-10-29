@@ -74,10 +74,10 @@ export function CapPills() {
   return (
     <>
       <Tip text={c.tools ? 'Izinkan AI memakai browser terisolasi' : 'Penyedia tidak mendukung tool calling'}>
-        <button className={`pill ${caps.web ? 'on' : ''}`} aria-pressed={caps.web} disabled={!c.tools} onClick={() => toggle('web')}><Globe size={14} />Web</button>
+        <button className={`pill ${caps.web ? 'on' : ''}`} aria-pressed={caps.web} disabled={!c.tools} onClick={() => toggle('web')}><Globe size={14} /><span className="pt">Web</span></button>
       </Tip>
       <Tip text={computerTip}>
-        <button className={`pill ${caps.computer && computerOk ? 'on' : ''}`} aria-pressed={caps.computer} disabled={!computerOk} onClick={() => toggle('computer')}><MonitorSmartphone size={14} />Komputer</button>
+        <button className={`pill ${caps.computer && computerOk ? 'on' : ''}`} aria-pressed={caps.computer} disabled={!computerOk} onClick={() => toggle('computer')}><MonitorSmartphone size={14} /><span className="pt">Komputer</span></button>
       </Tip>
     </>
   );
