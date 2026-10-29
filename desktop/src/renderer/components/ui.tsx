@@ -26,25 +26,31 @@ function useOutside(ref: React.RefObject<HTMLElement | null>, cb: () => void, on
   }, [on, cb, ref]);
 }
 
-export interface Option<T extends string> { value: T; label: string; hint?: string; icon?: ReactNode; disabled?: boolean }
+export interface Option<T extends string> { value: T; label: string; hint?: string; icon?: ReactNode; disabled?: boolean; separatorBefore?: boolean }
 /** Dropdown kustom (bukan <select> bawaan OS). */
-export function Dropdown<T extends string>({ value, options, onChange, label, width }: { value: T; options: Option<T>[]; onChange: (v: T) => void; label: string; width?: number }) {
+export function Dropdown<T extends string>({ value, options, onChange, label, width, placement = 'down', boxed, alignRight, prefix, hideValue }: {
+  value: T; options: Option<T>[]; onChange: (v: T) => void; label: string; width?: number; placement?: 'up' | 'down'; boxed?: boolean; alignRight?: boolean; prefix?: ReactNode; hideValue?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useOutside(ref, () => setOpen(false), open);
   const cur = options.find((o) => o.value === value);
+  const y = placement === 'up' ? 8 : -8;
   return (
     <div className="dd" ref={ref}>
-      <button className="dd-btn" aria-haspopup="listbox" aria-expanded={open} aria-label={label} style={{ minWidth: width }} onClick={() => setOpen((o) => !o)}>
-        {cur?.icon}<span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cur?.label ?? '—'}</span><ChevronDown size={15} />
+      <button className={`dd-btn ${boxed ? 'boxed' : ''}`} aria-haspopup="listbox" aria-expanded={open} aria-label={label} style={{ minWidth: width }} onClick={() => setOpen((o) => !o)}>
+        {prefix ?? cur?.icon}{!hideValue && <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>{cur?.label ?? '—'}</span>}<ChevronDown size={14} />
       </button>
       <AnimatePresence>
         {open && (
-          <motion.div className="dd-menu" role="listbox" initial={{ opacity: 0, y: -6, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: .12 }}>
+          <motion.div className={`dd-menu ${placement} ${alignRight ? 'right' : ''}`} role="listbox" initial={{ opacity: 0, y, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: y / 2 }} transition={{ duration: .12 }}>
             {options.map((o) => (
-              <button key={o.value} role="option" aria-selected={o.value === value} disabled={o.disabled} className={`dd-item ${o.value === value ? 'on' : ''}`} onClick={() => { onChange(o.value); setOpen(false); }}>
-                {o.icon}<span style={{ flex: 1 }}>{o.label}{o.hint && <small style={{ display: 'block', color: 'var(--faint)' }}>{o.hint}</small>}</span>{o.value === value && <Check size={14} />}
-              </button>
+              <div key={o.value}>
+                {o.separatorBefore && <div className="dd-sep" />}
+                <button role="option" aria-selected={o.value === value} disabled={o.disabled} className={`dd-item ${o.value === value ? 'on' : ''}`} onClick={() => { onChange(o.value); setOpen(false); }}>
+                  {o.icon}<span style={{ flex: 1 }}>{o.label}{o.hint && <small>{o.hint}</small>}</span>{o.value === value && <Check size={14} />}
+                </button>
+              </div>
             ))}
           </motion.div>
         )}
@@ -98,6 +104,6 @@ export function Modal({ children, onClose, label }: { children: ReactNode; onClo
 
 export function Typing() { return <span className="typing" aria-label="AI sedang bekerja"><i /><i /><i /></span>; }
 
-export function Empty({ title, children, icon }: { title: string; children?: ReactNode; icon?: ReactNode }) {
-  return <div className="empty"><div><div className="glow">{icon ?? <Logo size={34} />}</div><h1>{title}</h1>{children}</div></div>;
+export function Empty({ title, children }: { title: string; children?: ReactNode }) {
+  return <div className="empty"><div className="empty-in"><Logo size={44} /><h1 className="serif">{title}</h1>{children}</div></div>;
 }

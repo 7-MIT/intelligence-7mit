@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { AgentEvent, AgentMode, ApprovalRequest, PlanStep, Settings, TaskStatus, TaskSummary, TimelineEvent, Workspace } from '@shared/types';
+import type { AgentEvent, AgentMode, TaskCaps, ApprovalRequest, PlanStep, Settings, TaskStatus, TaskSummary, TimelineEvent, Workspace } from '@shared/types';
 import type { TaskStartInput } from '@shared/ipc';
 import type { PermissionManager } from '../security/permissions';
 import type { ApprovalBroker } from '../security/approvals';
@@ -38,13 +38,21 @@ interface Task {
 
 const TERMINAL: TaskStatus[] = ['stopped', 'done', 'error'];
 
-export function toolNamesFor(mode: AgentMode, submode?: string): string[] {
+/** Kemampuan efektif: mode lama 'web'/'control' dipetakan ke kemampuan di dalam Code. */
+export function effectiveCaps(mode: AgentMode, caps?: Partial<TaskCaps>): TaskCaps {
+  return { web: mode === 'web' || !!caps?.web, computer: mode === 'control' || !!caps?.computer };
+}
+
+export function toolNamesFor(mode: AgentMode, submode?: string, caps?: Partial<TaskCaps>): string[] {
   const G = TOOL_GROUPS;
   let names: string[] = [];
   if (mode === 'code') {
-    names = [...G.meta, ...G.fsRead, ...G.browserRead];
+    const c = effectiveCaps(mode, caps);
+    names = [...G.meta, ...G.fsRead, ...(c.web ? G.browser : G.browserRead)];
     if (submode !== 'plan') names.push(...G.fsWrite);
     if (submode === 'agent' || submode === undefined) names.push(...G.terminal);
+    // Komputer: hanya pada sub-mode Agent (butuh aksi input); Plan/Edit tidak mendapat tool kontrol.
+    if (c.computer && (submode === 'agent' || submode === undefined)) names.push(...G.control);
   } else if (mode === 'web') names = [...G.meta, ...G.browser];
   else if (mode === 'control') names = [...G.meta, ...G.control, ...G.fsRead, ...G.fsWrite, ...G.terminal];
   return names;
@@ -58,6 +66,7 @@ export class AgentTaskManager {
 
   list(): TaskSummary[] { return [...this.tasks.values()].map((t) => ({ ...t.summary })).sort((a, b) => b.startedAt - a.startedAt); }
   timeline(id: string): TimelineEvent[] { return this.tasks.get(id)?.timeline ?? []; }
+  hasRunningComputer(): boolean { return [...this.tasks.values()].some((t) => !TERMINAL.includes(t.summary.status) && t.summary.caps?.computer); }
   hasRunning(mode?: AgentMode): boolean { return [...this.tasks.values()].some((t) => !TERMINAL.includes(t.summary.status) && (!mode || t.summary.mode === mode)); }
 
   private setStatus(t: Task, status: TaskStatus) {
@@ -91,7 +100,7 @@ export class AgentTaskManager {
   start(input: TaskStartInput): TaskSummary {
     const workspace = input.workspaceId ? this.d.getWorkspace(input.workspaceId) : undefined;
     const t: Task = {
-      summary: { id: randomUUID(), title: input.prompt.slice(0, 80), mode: input.mode, status: 'running', startedAt: Date.now(), steps: 0, conversationId: input.conversationId },
+      summary: { id: randomUUID(), title: input.prompt.slice(0, 80), mode: input.mode, status: 'running', startedAt: Date.now(), steps: 0, conversationId: input.conversationId, caps: effectiveCaps(input.mode, input.capabilities) },
       abort: new AbortController(), paused: false, resumeWaiters: [], waitingApproval: 0, timeline: [], tainted: false
     };
     this.tasks.set(t.summary.id, t);
@@ -142,7 +151,7 @@ export class AgentTaskManager {
 
   private fail(t: Task, title: string, detail: string) {
     this.note(t, 'error', title, detail);
-    this.d.emit({ type: 'text_done', taskId: t.summary.id, messageId: randomUUID(), content: `⚠️ ${title}\n\n${detail}` });
+    this.d.emit({ type: 'text_done', taskId: t.summary.id, messageId: randomUUID(), content: `⚠️ ${title}\n\n${detail}`, at: Date.now() });
     this.setStatus(t, 'error');
   }
 
@@ -155,14 +164,14 @@ export class AgentTaskManager {
 
     if (mode !== 'chat') {
       if (!caps.tools) return this.fail(t, `Penyedia "${provider.config.name}" tidak mendukung tool calling`, `${caps.reason ?? ''}\nMode ${mode} membutuhkan tool calling, jadi tidak dijalankan agar tidak berpura-pura bekerja. Pilih penyedia kompatibel OpenAI yang mendukung tool calling di Pengaturan.`.trim());
-      if (mode === 'control') {
+      if (effectiveCaps(mode, input.capabilities).computer && (mode === 'control' || input.submode === 'agent' || !input.submode)) {
         if (!caps.vision) return this.fail(t, `Penyedia "${provider.config.name}" tidak mendukung vision`, 'Mode Control perlu model multimodal untuk membaca layar. Pilih model dengan vision, atau tandai dukungan vision jika model Anda memang mendukungnya.');
         if (!perm.grants.screen) return this.fail(t, 'Izin "Screen observation" belum diberikan', 'Aktifkan izin di Permission Center sebelum memulai Control Session.');
         if (!perm.allowScreenshotUpload) return this.fail(t, 'Pengiriman screenshot ke penyedia AI belum diizinkan', `Mode Control mengirim screenshot ke ${provider.config.name} (${provider.config.baseUrl}). Aktifkan "Izinkan kirim screenshot ke penyedia AI" di Permission Center jika Anda setuju.`);
       }
     }
 
-    const tools = mode === 'chat' ? [] : toolNamesFor(mode, input.submode).map((n) => this.d.executor.get(n)).filter((x): x is NonNullable<typeof x> => !!x);
+    const tools = mode === 'chat' ? [] : toolNamesFor(mode, input.submode, input.capabilities).map((n) => this.d.executor.get(n)).filter((x): x is NonNullable<typeof x> => !!x);
     const specs = tools.map(toSpec);
     const ctx: ToolContext = {
       taskId: t.summary.id, mode, workspace, allowedTools: new Set(tools.map((x) => x.name)), signal: t.abort.signal, emit: (e) => {
@@ -179,7 +188,7 @@ export class AgentTaskManager {
       }
     };
 
-    const messages: LLMMessage[] = [{ role: 'system', content: buildSystemPrompt({ mode, submode: input.submode, workspace, memory: workspace ? this.d.memoryRead(workspace.id) : undefined, platform: this.d.platform }) }];
+    const messages: LLMMessage[] = [{ role: 'system', content: buildSystemPrompt({ mode, submode: input.submode, caps: effectiveCaps(mode, input.capabilities), workspace, memory: workspace ? this.d.memoryRead(workspace.id) : undefined, platform: this.d.platform }) }];
     for (const h of input.history ?? []) messages.push({ role: h.role, content: h.content });
     const userParts: ContentPart[] = [{ type: 'text', text: input.prompt }];
     for (const a of input.attachments ?? []) {
@@ -213,7 +222,7 @@ export class AgentTaskManager {
       }
       if (t.abort.signal.aborted) return;
 
-      if (resp.content) this.d.emit({ type: 'text_done', taskId: t.summary.id, messageId, content: resp.content });
+      if (resp.content) this.d.emit({ type: 'text_done', taskId: t.summary.id, messageId, content: resp.content, at: Date.now() });
       messages.push({
         role: 'assistant', content: resp.content || null,
         ...(resp.toolCalls.length ? { tool_calls: resp.toolCalls.map((c) => ({ id: c.id, type: 'function' as const, function: { name: c.name, arguments: c.arguments || '{}' } })) } : {})
@@ -242,7 +251,7 @@ export class AgentTaskManager {
       }
     }
     this.note(t, 'warning', `Batas ${settings.maxSteps} langkah tercapai`, 'Task dihentikan agar tidak berjalan tanpa batas. Mulai task baru untuk melanjutkan.');
-    this.d.emit({ type: 'text_done', taskId: t.summary.id, messageId: randomUUID(), content: `⏹ Batas ${settings.maxSteps} langkah tercapai. Kirim pesan lanjutan untuk meneruskan.` });
+    this.d.emit({ type: 'text_done', taskId: t.summary.id, messageId: randomUUID(), content: `⏹ Batas ${settings.maxSteps} langkah tercapai. Kirim pesan lanjutan untuk meneruskan.`, at: Date.now() });
     this.setStatus(t, 'done');
   }
 }

@@ -18,7 +18,7 @@ const app = await electron.launch({ ...(process.env.IT7_APP_EXE ? { executablePa
 const page = await app.firstWindow();
 page.on('pageerror', (e) => console.error('[pageerror]', e.message));
 try {
-await page.waitForSelector('text=Permission Center', { timeout: 30000 });
+await page.waitForSelector('aside >> text=Permission Center', { timeout: 30000 });
 await page.screenshot({ path: path.join(shots, '01-chat.png') });
 console.log('✓ UI termuat');
 
@@ -41,10 +41,10 @@ const provider = await page.evaluate(async ({ port }) => {
 }, { port: mock.port });
 const w = await page.evaluate((dir) => window.it7.ws.add({ name: 'e2e-ws', path: dir }), ws);
 await page.reload();
-await page.waitForSelector('text=Permission Center');
+await page.waitForSelector('aside >> text=Permission Center');
 
 // Chat biasa
-await page.click('nav >> text=Chat');
+await page.click('.modeseg button:has-text("Chat")');
 await page.fill('textarea[aria-label="Pesan"]', 'halo');
 await page.click('button[aria-label="Kirim"]');
 await page.waitForSelector('text=balasan tiruan', { timeout: 15000 });
@@ -53,21 +53,21 @@ console.log('✓ chat streaming dari endpoint OpenAI-compatible');
 assert.equal(mock.seen.at(-1).auth, 'Bearer sk-e2e-test-key-0123456789');
 
 // Code agent: tool call -> persetujuan -> berkas ditulis
-await page.click('nav >> text=Code');
-await page.waitForSelector('h2:has-text("Code")');
-await page.waitForSelector('textarea[placeholder*="website"]');
-await page.click('button:has-text("Pilih workspace"), [aria-label="Pilih workspace"]');
+await page.click('.modeseg button:has-text("Code")');
+await page.waitForSelector('textarea[placeholder*="membangun"]');
+await page.click('[aria-label="Pilih proyek"]');
 await page.click(`button[role=option]:has-text("e2e-ws")`);
 await page.fill('textarea[aria-label="Pesan"]', 'tolong buat file hello.txt');
 await page.click('button[aria-label="Kirim"]');
-await page.waitForSelector('[role=dialog] >> text=Persetujuan diperlukan', { timeout: 15000 });
+await page.waitForSelector('[role=alertdialog] >> text=AI meminta izin', { timeout: 15000 });
 await page.screenshot({ path: path.join(shots, '03-approval.png') });
 assert.ok(!fs.existsSync(path.join(ws, 'hello.txt')), 'berkas tidak boleh ada sebelum disetujui');
-await page.click('button:has-text("Setujui sekali")');
+await page.click('[role=alertdialog] button:text-is("Setujui")');
 await page.waitForSelector('text=Selesai. Hasil tool', { timeout: 15000 });
 assert.equal(fs.readFileSync(path.join(ws, 'hello.txt'), 'utf8'), 'halo dari agen\n');
 await page.screenshot({ path: path.join(shots, '04-code-done.png') });
 // Editor Monaco (bundel lokal + worker blob) harus tampil di bawah CSP produksi bila ada
+await page.click('button[aria-label="Panel samping"]');
 await page.click('.explorer >> text=hello.txt');
 await page.waitForSelector('.monaco-editor', { timeout: 20000 });
 await page.waitForSelector('.monaco-editor >> text=halo dari agen');
@@ -78,18 +78,17 @@ console.log('✓ agen Code menulis berkas nyata setelah persetujuan');
 // Penolakan
 await page.fill('textarea[aria-label="Pesan"]', 'buat file lagi');
 await page.click('button[aria-label="Kirim"]');
-await page.waitForSelector('[role=dialog] >> text=Persetujuan diperlukan', { timeout: 15000 });
-await page.click('button:has-text("Tolak")');
+await page.waitForSelector('[role=alertdialog] >> text=AI meminta izin', { timeout: 15000 });
+await page.click('[role=alertdialog] button:has-text("Tolak")');
 await page.waitForTimeout(500);
 console.log('✓ penolakan ditangani');
 
 // Control tanpa kemampuan: gagal jelas
-await page.click('nav >> text=Control');
-await page.waitForSelector('h2:has-text("Control Session")');
-await page.waitForSelector('textarea[placeholder*="komputer"]');
+await page.waitForSelector('button[aria-label="Kirim"]', { timeout: 20000 }); // task sebelumnya selesai
+await page.click('button:has-text("Komputer")');
 await page.fill('textarea[aria-label="Pesan"]', 'buka notepad');
 await page.click('button[aria-label="Kirim"]');
-await page.waitForSelector('.bubble:has-text("Screen observation")', { timeout: 15000 });
+await page.waitForSelector('.a-msg:has-text("Screen observation")', { timeout: 15000 });
 await page.screenshot({ path: path.join(shots, '05-control-blocked.png') });
 console.log('✓ Control menolak jujur tanpa izin');
 
@@ -113,7 +112,7 @@ const ps = await page.evaluate(() => window.it7.provider.list());
 assert.ok(!JSON.stringify(ps).includes('sk-e2e'));
 console.log('✓ API key tidak pernah mencapai renderer / berkas teks biasa');
 
-await page.click('nav >> text=Code');
+await page.click('.modeseg button:has-text("Code")');
 await page.waitForTimeout(800);
 await page.screenshot({ path: path.join(shots, '09-code.png') });
 await app.close();

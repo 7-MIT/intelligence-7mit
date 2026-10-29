@@ -53,7 +53,7 @@ fs.writeFileSync(path.join(userData, 'permissions.json'), JSON.stringify({ grant
 const app = await electron.launch({ ...(process.env.IT7_APP_EXE ? { executablePath: process.env.IT7_APP_EXE } : {}), args: [...(process.env.IT7_APP_EXE ? [] : ['.']), '--no-sandbox', `--user-data-dir=${userData}`], env: { ...process.env, IT7_E2E: '1' } });
 const page = await app.firstWindow();
 try {
-  await page.waitForSelector('text=Permission Center', { timeout: 30000 });
+  await page.waitForSelector('aside >> text=Permission Center', { timeout: 30000 });
   const sys = await page.evaluate(() => window.it7.system.status());
   console.log('status sistem:', JSON.stringify({ input: sys.input, platform: sys.platform }));
   assert.equal(sys.input.available, true, 'nut.js harus termuat: ' + sys.input.reason);
@@ -67,18 +67,19 @@ try {
     window.it7.onAgentEvent((e) => { if (e.type === 'approval') { window.__approved.push(e.request.tool + ':' + e.request.risk); window.it7.perm.respond({ id: e.request.id, approved: true }); } });
   }, { port });
   await page.reload();
-  await page.waitForSelector('text=Permission Center');
+  await page.waitForSelector('aside >> text=Permission Center');
   await page.evaluate(() => { window.__approved = []; window.it7.onAgentEvent((e) => { if (e.type === 'approval') { window.__approved.push(e.request.tool + ':' + e.request.risk); window.it7.perm.respond({ id: e.request.id, approved: true }); } }); });
 
-  await page.click('nav >> text=Control');
-  await page.waitForSelector('textarea[placeholder*="komputer"]');
+  await page.click('.modeseg button:has-text("Code")');
+  await page.waitForSelector('textarea[aria-label="Pesan"]');
+  await page.click('button:has-text("Komputer")');
   // xterm dibuka SETELAH jendela aplikasi sehingga berada di atasnya (tanpa window manager, urutan = waktu dibuat)
   xterm = spawn('xterm', ['-T', 'it7xterm', '-geometry', '60x16+100+100', '-e', 'sh', '-c', `cat > ${out}`], { stdio: 'ignore' });
   xterm.on('exit', () => { xtermExited.done = true; });
   await new Promise((r) => setTimeout(r, 1500));
-  await page.fill('textarea[placeholder*="komputer"]', 'ketik halo di terminal');
+  await page.fill('textarea[aria-label="Pesan"]', 'ketik halo di terminal');
   await page.click('button[aria-label="Kirim"]');
-  await page.waitForSelector('.bubble:has-text("Selesai: sudah mengetik")', { timeout: 40000 });
+  await page.waitForSelector('.a-msg:has-text("Selesai: sudah mengetik")', { timeout: 40000 });
   await page.screenshot({ path: path.join(shots, '10-control-live.png') });
 
   await new Promise((r) => setTimeout(r, 500));
@@ -101,7 +102,7 @@ try {
   console.log('✓ setiap tindakan input meminta persetujuan:', approved.join(', '));
   const frame = await page.evaluate(() => document.querySelector('.screen img')?.src?.slice(0, 23));
   assert.equal(frame, 'data:image/jpeg;base64,');
-  console.log('✓ pratinjau layar langsung tampil di Control Session');
+  console.log('✓ pratinjau layar langsung tampil di panel Layar (Code + Komputer)');
 
   // Stop: task baru, tolak semua lalu Stop AI
   await app.close();

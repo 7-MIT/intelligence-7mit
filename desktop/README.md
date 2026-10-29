@@ -2,12 +2,12 @@
 
 Aplikasi desktop (Electron + React + TypeScript) untuk **agen AI yang benar-benar bertindak** di komputer Anda — dengan izin dan kendali penuh pengguna. Pengembangan dari [intelligence.7mit](https://intelligence.7mit.org) versi web (repositori induk: kode web di root repo tidak diubah).
 
+Antarmuka bergaya Claude/Codex dengan **dua mode**:
+
 | Mode | Kemampuan nyata |
 | --- | --- |
-| **Chat** | Percakapan, riwayat, pencarian, Markdown + syntax highlighting, lampiran & drag-drop. |
-| **Code** (Plan / Edit / Agent) | Membaca struktur proyek, `edit_file`/`write_file` **dengan diff sebelum diterapkan**, terminal, build/test, perbaikan error, Git (status/diff/commit atas persetujuan), editor Monaco, file explorer, terminal bawaan, live preview localhost, memori workspace. |
-| **Web** | Playwright dengan sesi **terisolasi** (tanpa login/cookie Anda): buka, klik, isi form, scroll, tab, screenshot, unduhan, `expect_text` untuk pengujian, log konsol/jaringan untuk debugging. Tampilan live real-time. Kirim/beli/hapus/terbitkan **selalu** minta konfirmasi. |
-| **Control** | Siklus *Observe → Plan → Request Permission → Act → Verify → Continue*: screenshot desktop, klik kiri/kanan/ganda, drag, scroll, ketik, shortcut, buka aplikasi, daftar/fokus/minimize/maximize/tutup jendela, berkas & terminal. Setiap aksi input diverifikasi otomatis dengan screenshot baru (dan memberi peringatan bila layar tidak berubah). |
+| **Chat** | Percakapan biasa dengan AI (tanpa akses ke komputer): riwayat per tanggal, pencarian, Markdown + syntax highlighting, lampiran & drag-drop. |
+| **Code** | Agen yang bekerja di proyek Anda. Sub-mode **Plan / Edit / Agent**. Thread menampilkan log aktivitas ala Codex (langkah, diff, persetujuan inline). Panel samping: **Berkas** (explorer + Monaco), **Perubahan** (Git diff/commit), **Terminal**, **Peramban**, **Layar**. Kemampuan tambahan dapat dihidupkan di composer: **Web** (Playwright terisolasi: klik, isi form, screenshot, uji, unduhan) dan **Komputer** (Control: screenshot desktop, mouse, keyboard, aplikasi & jendela, siklus *Observe → Plan → Izin → Act → Verify*, kursor AI dan pil "sedang mengontrol" dengan tombol Berhenti). |
 
 Semua tindakan terlihat di **Activity Timeline**, bisa di-**Pause / Resume / Stop**, dan melewati **Permission Center** + **audit log**.
 

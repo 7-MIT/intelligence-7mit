@@ -53,7 +53,8 @@ export const schemas = {
       role: z.enum(['user', 'assistant', 'system']),
       content: z.string().max(500_000),
       createdAt: z.number(),
-      attachments: z.array(z.object({ name: z.string(), mime: z.string(), size: z.number() })).optional()
+      attachments: z.array(z.object({ name: z.string(), mime: z.string(), size: z.number() })).optional(),
+      taskId: id.optional()
     })).max(5000),
     createdAt: z.number(),
     updatedAt: z.number()
@@ -66,6 +67,7 @@ export const schemas = {
     prompt: z.string().min(1).max(100_000),
     conversationId: id.optional(),
     workspaceId: id.optional(),
+    capabilities: z.object({ web: z.boolean(), computer: z.boolean() }).strict().optional(),
     history: z.array(z.object({ role: z.enum(['user', 'assistant']), content: z.string().max(200_000) })).max(200).optional(),
     attachments: z.array(attachment).max(8).optional()
   }).strict(),

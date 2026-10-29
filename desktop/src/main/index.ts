@@ -121,10 +121,10 @@ app.whenReady().then(() => {
   if (crashed) services.audit.log({ actor: 'system', tool: 'app.recover', decision: 'ok', summary: 'Aplikasi pulih setelah penutupan tidak normal' });
 
   const hooks = {
-    onStart: (t: import('@shared/types').TaskSummary) => { if (t.mode === 'control') startPreview(); if (t.mode === 'web' || t.mode === 'code') services.browser.startStream((dataUrl) => { if (win?.isVisible()) emit({ type: 'browser_frame', dataUrl }); }); },
+    onStart: (t: import('@shared/types').TaskSummary) => { if (t.caps?.computer) startPreview(); if (t.caps?.web || t.mode === 'code') services.browser.startStream((dataUrl) => { if (win?.isVisible()) emit({ type: 'browser_frame', dataUrl }); }); },
     onEnd: (t: import('@shared/types').TaskSummary) => {
       services.store.saveTask({ ...t });
-      if (t.mode === 'control' && !services.manager.hasRunning('control')) stopPreview();
+      if (t.caps?.computer && !services.manager.hasRunningComputer()) stopPreview();
       const s = services.store.getSettings();
       if (s.notifications && Notification.isSupported() && (!win?.isFocused())) {
         new Notification({ title: 'intelligence.7mit', body: `Task ${t.status === 'done' ? 'selesai' : t.status === 'stopped' ? 'dihentikan' : 'berakhir dengan error'}: ${t.title}` }).show();

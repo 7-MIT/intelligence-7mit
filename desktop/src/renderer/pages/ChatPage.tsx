@@ -1,31 +1,33 @@
-import { Sparkles } from 'lucide-react';
-import type { AgentMode } from '@shared/types';
-import { Composer, Messages, StatusPill } from '@/components/agent';
-import { ModelBar, useCurrentTask } from '@/components/common';
+import { Composer } from '@/components/agent';
+import { ModelPicker, useCurrentTask } from '@/components/common';
+import { Thread } from '@/components/thread';
 import { Empty } from '@/components/ui';
-import { store } from '@/lib/state';
+import { send, store } from '@/lib/state';
 
-export function ChatPane({ mode, placeholder, hint, disabled }: { mode: AgentMode; placeholder: string; hint?: string; disabled?: string }) {
-  const conv = store.use((s) => s.conv);
-  const task = useCurrentTask(mode);
-  const has = conv?.mode === mode && conv.messages.length > 0;
-  return (
-    <div className="chat-wrap">
-      <div style={{ flex: 1, minHeight: 0 }}>
-        {has ? <Messages mode={mode} task={task} /> : <Empty title="Apa yang ingin Anda kerjakan?" icon={<Sparkles color="#fff" />}><p style={{ maxWidth: 480 }}>{hint}</p></Empty>}
-      </div>
-      <Composer mode={mode} task={task} placeholder={placeholder} disabled={disabled} />
-    </div>
-  );
-}
+const greeting = () => { const h = new Date().getHours(); return h < 11 ? 'Selamat pagi' : h < 15 ? 'Selamat siang' : h < 19 ? 'Selamat sore' : 'Selamat malam'; };
+const SUGGESTIONS = [
+  { t: 'Jelaskan konsep', d: 'Terangkan perubahan iklim dengan bahasa sederhana' },
+  { t: 'Bantu menulis', d: 'Buat draf email permohonan izin yang sopan' },
+  { t: 'Rangkum', d: 'Rangkum langkah belajar efektif untuk ujian' },
+  { t: 'Brainstorm', d: 'Beri 10 ide nama untuk proyek aplikasi belajar' }
+];
 
 export function ChatPage() {
-  const task = useCurrentTask('chat');
+  const conv = store.use((s) => s.conv);
+  const task = useCurrentTask();
+  const has = !!conv && conv.mode === 'chat' && conv.messages.length > 0;
+  const composer = <Composer mode="chat" task={task} placeholder="Tanyakan apa saja…" rightExtra={<ModelPicker />} below={<span>Chat biasa tanpa akses ke komputer Anda. Untuk agen yang bertindak, pindah ke <b>Code</b>.</span>} />;
   return (
     <>
-      <div className="topbar"><h2 className="display">Chat</h2><ModelBar mode="chat" /><StatusPill task={task} /></div>
-      <div className="page" style={{ overflow: 'hidden' }}>
-        <ChatPane mode="chat" placeholder="Tanyakan apa saja…" hint="Percakapan biasa tanpa akses ke komputer Anda. Gunakan Code, Web, atau Control untuk agen yang bertindak." />
+      <div className="topbar drag"><span className="title no-drag">{has ? conv!.title : 'Chat baru'}</span></div>
+      <div className="chat-wrap">
+        {has ? (<><Thread code={false} />{composer}</>) : (
+          <div className="empty"><div className="empty-in">
+            <Empty title={`${greeting()}. Apa yang ingin Anda bahas?`} />
+            <div style={{ marginTop: -8 }}>{composer}</div>
+            <div className="sugs">{SUGGESTIONS.map((s) => <button key={s.t} className="sug" onClick={() => send('chat', s.d)}><b>{s.t}</b>{s.d}</button>)}</div>
+          </div></div>
+        )}
       </div>
     </>
   );

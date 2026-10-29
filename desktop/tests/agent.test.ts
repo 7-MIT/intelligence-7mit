@@ -190,6 +190,13 @@ describe('AgentTaskManager', () => {
     expect(toolNamesFor('web')).not.toContain('run_command');
     expect(toolNamesFor('control')).toContain('click');
     expect(toolNamesFor('chat')).toEqual([]);
+    // kemampuan di dalam Code
+    expect(toolNamesFor('code', 'agent', { web: true })).toContain('browser_click');
+    expect(toolNamesFor('code', 'agent', { web: false })).not.toContain('browser_click');
+    expect(toolNamesFor('code', 'agent', { computer: true })).toContain('click');
+    expect(toolNamesFor('code', 'plan', { computer: true })).not.toContain('click');
+    expect(toolNamesFor('code', 'edit', { computer: true })).not.toContain('click');
+    expect(toolNamesFor('code', 'agent')).not.toContain('click');
   });
 
   it('model tidak dapat memanggil tool di luar mode (mis. click di mode code)', async () => {
@@ -207,5 +214,24 @@ describe('AgentTaskManager', () => {
     await waitFor(() => m.list()[0].status === 'done');
     expect(p.calls[1].messages.at(-1)?.content).toMatch(/tidak tersedia pada mode/);
     expect(h.driver.calls).toHaveLength(0);
+  });
+
+  it('Code + kemampuan Komputer: tetap butuh vision, izin screen, dan izin kirim screenshot', async () => {
+    const h = harness({ grants: { screen: true, input: true }, autoApprove: true });
+    const m = makeManager(h, new ScriptedProvider(() => ({ content: '', toolCalls: [], finishReason: 'stop' })));
+    m.start({ mode: 'code', submode: 'agent', prompt: 'x', workspaceId: 'w1', capabilities: { web: false, computer: true } });
+    await waitFor(() => m.list()[0].status === 'error');
+    expect(JSON.stringify(h.events)).toMatch(/screenshot ke penyedia AI belum diizinkan/);
+  });
+
+  it('Code + Komputer berjalan end-to-end (klik lewat driver) dan menandai task.caps', async () => {
+    const h = harness({ grants: { screen: true, input: true }, autoApprove: true });
+    h.permissions.update({ allowScreenshotUpload: true });
+    const p = new ScriptedProvider((_r, n) => n === 1 ? { content: '', toolCalls: [call('screenshot', {}, 's')], finishReason: 'tool_calls' } : n === 2 ? { content: '', toolCalls: [call('click', { x: 10, y: 10 }, 'k')], finishReason: 'tool_calls' } : { content: 'ok', toolCalls: [], finishReason: 'stop' });
+    const m = makeManager(h, p);
+    m.start({ mode: 'code', submode: 'agent', prompt: 'x', workspaceId: 'w1', capabilities: { web: false, computer: true } });
+    await waitFor(() => m.list()[0].status === 'done');
+    expect(m.list()[0].caps).toEqual({ web: false, computer: true });
+    expect(h.driver.calls).toContain('click left x1');
   });
 });

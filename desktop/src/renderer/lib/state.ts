@@ -1,12 +1,13 @@
 import type {
-  AgentEvent, AgentMode, ApprovalRequest, ChatMessage, CodeSubmode, Conversation, PermissionState, PlanStep, ProviderConfig, Settings, SystemStatus, TaskSummary, TimelineEvent, Workspace
+  AgentEvent, AgentMode, ApprovalRequest, TaskCaps, ChatMessage, CodeSubmode, Conversation, PermissionState, PlanStep, ProviderConfig, Settings, SystemStatus, TaskSummary, TimelineEvent, Workspace
 } from '@shared/types';
 import { DEFAULT_PERMISSIONS, DEFAULT_SETTINGS } from '@shared/types';
 import type { TaskStartInput } from '@shared/ipc';
 import { api, errMsg } from './api';
 import { createStore } from './mini-store';
 
-export type Page = 'chat' | 'code' | 'web' | 'control' | 'permissions' | 'history' | 'settings';
+export type Page = 'chat' | 'code' | 'permissions' | 'history' | 'settings';
+export type PanelTab = 'files' | 'changes' | 'terminal' | 'browser' | 'screen';
 export interface Toast { id: string; kind: 'info' | 'error' | 'success'; text: string }
 export interface Attachment { name: string; mime: string; size: number; data: string }
 
@@ -34,13 +35,16 @@ export interface AppState {
   system: SystemStatus | null;
   info: { version: string; platform: string; arch: string; packaged: boolean; userData: string; crashed: boolean } | null;
   submode: CodeSubmode;
-  controlTaskId?: string;
+  caps: TaskCaps;
+  panelOpen: boolean;
+  panelTab: PanelTab;
+  sidebarOpen: boolean;
 }
 
 export const store = createStore<AppState>({
   ready: false, page: 'chat', settings: DEFAULT_SETTINGS, permissions: DEFAULT_PERMISSIONS, providers: [], workspaces: [], convList: [], conv: null,
   streams: {}, tasks: {}, taskConv: {}, timelines: {}, plans: {}, approvals: [], frame: null, target: null, browserFrame: null, capture: { active: false },
-  toasts: [], system: null, info: null, submode: 'agent'
+  toasts: [], system: null, info: null, submode: 'agent', caps: { web: false, computer: false }, panelOpen: false, panelTab: 'files', sidebarOpen: true
 });
 
 const uid = () => crypto.randomUUID();
@@ -66,7 +70,7 @@ export async function refreshAll() {
 }
 
 const UI_KEY = 'it7.ui.v1';
-function loadUi(): { page?: Page; workspaceId?: string; submode?: CodeSubmode } {
+function loadUi(): { page?: string; workspaceId?: string; submode?: CodeSubmode; caps?: TaskCaps; panelOpen?: boolean; panelTab?: PanelTab; sidebarOpen?: boolean } {
   try { return JSON.parse(localStorage.getItem(UI_KEY) ?? '{}'); } catch { return {}; }
 }
 
@@ -77,16 +81,19 @@ export async function init() {
   const ui = loadUi();
   const ws = store.get().workspaces;
   store.set({
-    page: ui.page && ['chat', 'code', 'web', 'control', 'permissions', 'history', 'settings'].includes(ui.page) ? ui.page : 'chat',
+    // 'web'/'control' adalah mode lama; sekarang menjadi kemampuan di dalam Code.
+    page: ui.page === 'web' || ui.page === 'control' ? 'code' : ['chat', 'code', 'permissions', 'history', 'settings'].includes(ui.page ?? '') ? (ui.page as Page) : 'chat',
+    caps: { web: !!ui.caps?.web, computer: !!ui.caps?.computer },
+    panelOpen: !!ui.panelOpen, panelTab: ui.panelTab ?? 'files', sidebarOpen: ui.sidebarOpen !== false,
     submode: ui.submode && ['plan', 'edit', 'agent'].includes(ui.submode) ? ui.submode : 'agent',
     workspaceId: ws.some((w) => w.id === ui.workspaceId) ? ui.workspaceId : ws[0]?.id
   });
   store.subscribe(() => {
-    const { page, workspaceId, submode } = store.get();
-    try { localStorage.setItem(UI_KEY, JSON.stringify({ page, workspaceId, submode })); } catch { /* penyimpanan tidak tersedia */ }
+    const { page, workspaceId, submode, caps, panelOpen, panelTab, sidebarOpen } = store.get();
+    try { localStorage.setItem(UI_KEY, JSON.stringify({ page, workspaceId, submode, caps, panelOpen, panelTab, sidebarOpen })); } catch { /* penyimpanan tidak tersedia */ }
   });
   const tasks = await api.task.list();
-  store.set({ tasks: Object.fromEntries((tasks ?? []).map((t) => [t.id, t])), ready: true });
+  store.set({ tasks: Object.fromEntries((tasks ?? []).map((t) => [t.id, t])), taskConv: Object.fromEntries((tasks ?? []).filter((t) => t.conversationId).map((t) => [t.id, t.conversationId!])), ready: true });
   off?.();
   off = api.onAgentEvent((e) => handleEvent(e as AgentEvent));
   if (store.get().info?.crashed) toast('info', 'Aplikasi dipulihkan setelah penutupan tidak normal. Percakapan Anda aman; task yang berjalan sebelumnya tidak dilanjutkan.');
@@ -106,10 +113,10 @@ function pushTimeline(ev: TimelineEvent) {
   });
 }
 
-async function appendAssistant(taskId: string, content: string, messageId: string) {
+async function appendAssistant(taskId: string, content: string, messageId: string, at: number) {
   const convId = store.get().taskConv[taskId];
   if (!convId) return;
-  const msg: ChatMessage = { id: messageId, role: 'assistant', content, createdAt: Date.now() };
+  const msg: ChatMessage = { id: messageId, role: 'assistant', content, createdAt: at, taskId };
   const s = store.get();
   if (s.conv?.id === convId) {
     const conv = { ...s.conv, messages: [...s.conv.messages.filter((m) => m.id !== messageId), msg], updatedAt: Date.now() };
@@ -129,7 +136,7 @@ export function handleEvent(e: AgentEvent) {
     case 'text_delta': store.set((s) => ({ streams: { ...s.streams, [e.messageId]: { taskId: e.taskId, content: (s.streams[e.messageId]?.content ?? '') + e.delta } } })); break;
     case 'text_done': {
       store.set((s) => { const { [e.messageId]: _x, ...rest } = s.streams; return { streams: rest }; });
-      void appendAssistant(e.taskId, e.content, e.messageId);
+      void appendAssistant(e.taskId, e.content, e.messageId, e.at ?? Date.now());
       break;
     }
     case 'plan': store.set((s) => ({ plans: { ...s.plans, [e.taskId]: e.steps } })); break;
@@ -137,7 +144,7 @@ export function handleEvent(e: AgentEvent) {
     case 'approval_resolved': store.set((s) => ({ approvals: s.approvals.filter((a) => a.id !== e.id) })); break;
     case 'target': store.set({ target: { x: e.x, y: e.y, action: e.action, width: e.width, height: e.height, at: Date.now() } }); break;
     case 'frame': store.set({ frame: { dataUrl: e.dataUrl, width: e.width, height: e.height, at: e.at } }); break;
-    case 'browser_frame': store.set({ browserFrame: e.dataUrl }); break;
+    case 'browser_frame': store.set((s) => ({ browserFrame: e.dataUrl, ...(s.browserFrame ? {} : { panelOpen: true, panelTab: 'browser' as PanelTab }) })); break;
     case 'capture_status': store.set({ capture: { active: e.active, reason: e.reason } }); break;
   }
 }
@@ -146,11 +153,12 @@ export function setPage(page: Page) { store.set({ page }); }
 
 export async function openConversation(id: string) {
   const c = await guard(api.conv.get({ id }));
-  if (c) store.set({ conv: c, page: store.get().page === 'permissions' || store.get().page === 'settings' || store.get().page === 'history' ? c.mode : store.get().page });
+  if (c) store.set({ conv: c, page: c.mode === 'chat' ? 'chat' : 'code' });
 }
-export function newConversation(mode: AgentMode) {
+export function newConversation(mode: 'chat' | 'code') {
   store.set({ conv: null, page: mode });
 }
+export const isCodeConv = (m: AgentMode) => m !== 'chat';
 export async function deleteConversation(id: string) {
   await guard(api.conv.remove({ id }));
   if (store.get().conv?.id === id) store.set({ conv: null });
@@ -172,17 +180,21 @@ export async function send(mode: AgentMode, text: string, attachments: Attachmen
   if (!prompt) return;
   if (activeTaskFor(s.conv?.id)) { toast('info', 'Masih ada task berjalan di percakapan ini. Hentikan atau tunggu selesai.'); return; }
   const now = Date.now();
-  let conv = s.conv && s.conv.mode === mode ? s.conv : null;
+  let conv = s.conv && isCodeConv(s.conv.mode) === isCodeConv(mode) ? s.conv : null;
   if (!conv) conv = { id: uid(), title: prompt.slice(0, 48), mode, workspaceId: s.workspaceId, messages: [], createdAt: now, updatedAt: now };
   const history = conv.messages.filter((m) => m.role !== 'system').slice(-30).map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content.slice(0, 20000) }));
   const userMsg: ChatMessage = { id: uid(), role: 'user', content: prompt, createdAt: now, attachments: attachments.map(({ name, mime, size }) => ({ name, mime, size })) };
   conv = { ...conv, messages: [...conv.messages, userMsg], updatedAt: now };
   store.set({ conv });
   await api.conv.save(conv);
-  const input: TaskStartInput = { mode, prompt, conversationId: conv.id, workspaceId: mode === 'chat' ? undefined : s.workspaceId, history, attachments, ...(mode === 'code' ? { submode: s.submode } : {}) };
+  const input: TaskStartInput = { mode, prompt, conversationId: conv.id, workspaceId: mode === 'chat' ? undefined : s.workspaceId, history, attachments, ...(mode === 'code' ? { submode: s.submode, capabilities: s.caps } : {}) };
   const task = await guard(api.task.start(input));
   if (task) {
-    store.set((st) => ({ taskConv: { ...st.taskConv, [task.id]: conv!.id }, tasks: { ...st.tasks, [task.id]: task }, controlTaskId: mode === 'control' ? task.id : st.controlTaskId }));
+    store.set((st) => ({ taskConv: { ...st.taskConv, [task.id]: conv!.id }, tasks: { ...st.tasks, [task.id]: task } }));
+    if (task.caps?.computer) store.set({ panelOpen: true, panelTab: 'screen' });
+    const marked = { ...conv, messages: conv.messages.map((m) => (m.id === userMsg.id ? { ...m, taskId: task.id } : m)) };
+    if (store.get().conv?.id === marked.id) store.set({ conv: { ...store.get().conv!, messages: store.get().conv!.messages.map((m) => (m.id === userMsg.id ? { ...m, taskId: task.id } : m)) } });
+    await api.conv.save(marked);
   }
   store.set({ convList: (await api.conv.list()) ?? [] });
 }

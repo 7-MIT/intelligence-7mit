@@ -1,18 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Component, useEffect, type ReactNode } from 'react';
-import { ApprovalHost } from '@/components/agent';
+import { ApprovalCard } from '@/components/agent';
 import { Sidebar } from '@/components/Sidebar';
 import { init, store } from '@/lib/state';
 import { ChatPage } from '@/pages/ChatPage';
 import { CodePage } from '@/pages/CodePage';
-import { ControlPage } from '@/pages/ControlPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { PermissionsPage } from '@/pages/PermissionsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
-import { WebPage } from '@/pages/WebPage';
-import { Logo } from '@/components/ui';
+import { Logo, Modal } from '@/components/ui';
 
-const PAGES = { chat: ChatPage, code: CodePage, web: WebPage, control: ControlPage, permissions: PermissionsPage, history: HistoryPage, settings: SettingsPage };
+const PAGES = { chat: ChatPage, code: CodePage, permissions: PermissionsPage, history: HistoryPage, settings: SettingsPage };
 
 class Boundary extends Component<{ children: ReactNode }, { err?: Error }> {
   state: { err?: Error } = {};
@@ -21,6 +19,17 @@ class Boundary extends Component<{ children: ReactNode }, { err?: Error }> {
     if (this.state.err) return <div className="empty"><div><h1>Terjadi kesalahan tampilan</h1><p>{this.state.err.message}</p><button className="btn primary" onClick={() => this.setState({ err: undefined })}>Coba lagi</button></div></div>;
     return this.props.children;
   }
+}
+
+/** Persetujuan tampil inline di thread Code; bila tidak terlihat di sana (halaman lain / task percakapan lain) tampil sebagai dialog agar tidak pernah macet. */
+function ApprovalHost() {
+  const approvals = store.use((s) => s.approvals);
+  const page = store.use((s) => s.page);
+  const conv = store.use((s) => s.conv);
+  const taskConv = store.use((s) => s.taskConv);
+  const hidden = approvals.filter((a) => !(page === 'code' && conv && (!a.taskId || taskConv[a.taskId] === conv.id)));
+  if (!hidden.length) return null;
+  return <Modal label="Persetujuan tindakan AI"><ApprovalCard a={hidden[0]} count={hidden.length} /></Modal>;
 }
 
 export default function App() {

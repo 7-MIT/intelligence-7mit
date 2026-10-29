@@ -50,6 +50,7 @@ export interface ChatMessage {
   content: string;
   createdAt: number;
   attachments?: { name: string; mime: string; size: number }[];
+  taskId?: string;
 }
 
 export interface Conversation {
@@ -102,6 +103,13 @@ export interface TimelineEvent {
   risk?: Risk;
 }
 
+export interface TaskCaps {
+  /** Izinkan agen memakai browser terisolasi (Playwright). */
+  web: boolean;
+  /** Izinkan agen mengontrol komputer (screenshot, mouse, keyboard, jendela, aplikasi). */
+  computer: boolean;
+}
+
 export interface TaskSummary {
   id: string;
   title: string;
@@ -111,13 +119,14 @@ export interface TaskSummary {
   endedAt?: number;
   steps: number;
   conversationId?: string;
+  caps?: TaskCaps;
 }
 
 export type AgentEvent =
   | { type: 'task'; task: TaskSummary }
   | { type: 'timeline'; event: TimelineEvent }
   | { type: 'text_delta'; taskId: string; messageId: string; delta: string }
-  | { type: 'text_done'; taskId: string; messageId: string; content: string }
+  | { type: 'text_done'; taskId: string; messageId: string; content: string; at?: number }
   | { type: 'plan'; taskId: string; steps: PlanStep[] }
   | { type: 'approval'; request: ApprovalRequest }
   | { type: 'approval_resolved'; id: string; approved: boolean }
