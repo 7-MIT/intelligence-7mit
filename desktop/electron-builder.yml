@@ -1,5 +1,5 @@
 appId: org.mit7.intelligence.desktop
-productName: intelligence.7mit 6 Desktop
+productName: intelligence.7mit
 copyright: © 7 MIT
 directories:
   output: dist
@@ -24,7 +24,7 @@ win:
   target:
     - target: nsis
       arch: [x64]
-  artifactName: intelligence-7mit-6-desktop-${version}-win-${arch}.${ext}
+  artifactName: intelligence-7mit-${version}-win-${arch}.${ext}
   # Tanda tangan kode: aktif otomatis bila CSC_LINK / CSC_KEY_PASSWORD tersedia (lihat docs/SECURITY.md). Tidak ada tanda tangan palsu.
   signAndEditExecutable: true
 nsis:
@@ -33,8 +33,8 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  shortcutName: intelligence.7mit 6 Desktop
-  uninstallDisplayName: intelligence.7mit 6 Desktop
+  shortcutName: intelligence.7mit
+  uninstallDisplayName: intelligence.7mit
   deleteAppDataOnUninstall: false
 
 mac:
@@ -45,7 +45,7 @@ mac:
       arch: [x64, arm64]
     - target: zip # dipakai auto-update macOS
       arch: [x64, arm64]
-  artifactName: intelligence-7mit-6-desktop-${version}-mac-${arch}.${ext}
+  artifactName: intelligence-7mit-${version}-mac-${arch}.${ext}
   hardenedRuntime: true
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
@@ -56,7 +56,7 @@ mac:
     NSAccessibilityUsageDescription: intelligence.7mit Control membutuhkan Accessibility untuk mengklik dan mengetik atas izin Anda.
   # Notarisasi: aktif bila APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID tersedia.
 dmg:
-  title: intelligence.7mit 6 Desktop ${version}
+  title: intelligence.7mit ${version}
   contents:
     - { x: 130, y: 220 }
     - { x: 410, y: 220, type: link, path: /Applications }
@@ -67,4 +67,4 @@ linux:
   target:
     - target: AppImage
       arch: [x64]
-  artifactName: intelligence-7mit-6-desktop-${version}-linux-${arch}.${ext}
+  artifactName: intelligence-7mit-${version}-linux-${arch}.${ext}

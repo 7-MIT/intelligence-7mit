@@ -26,11 +26,11 @@ describe('AgentTaskManager', () => {
     expect(second.some((x) => x.role === 'tool' && x.tool_call_id === 'c1')).toBe(true);
   });
 
-  it('provider tanpa tool calling: mode non-chat gagal jelas, tidak pura-pura bekerja', async () => {
+  it('provider tanpa tool calling: mode Control/Web gagal jelas, tidak pura-pura bekerja (Code memakai mode teks)', async () => {
     const h = harness({ autoApprove: true });
     const p = new ScriptedProvider(() => ({ content: 'x', toolCalls: [], finishReason: 'stop' }), { chat: true, tools: false, vision: false });
     const m = makeManager(h, p);
-    m.start({ mode: 'code', prompt: 'x', workspaceId: 'w1' });
+    m.start({ mode: 'control', prompt: 'x' });
     await waitFor(() => m.list()[0].status === 'error');
     expect(p.calls).toHaveLength(0);
     expect(JSON.stringify(h.events)).toMatch(/tidak mendukung tool calling/);

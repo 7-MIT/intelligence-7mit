@@ -4,7 +4,8 @@
 | Perintah | Cakupan |
 | --- | --- |
 | `npm test` | 130+ tes vitest: shell-guard, PathGuard, PermissionManager (grant/readonly/ask/auto/tainted/abort), validasi IPC (zod), tool berkas & terminal nyata, tool Control (driver palsu: pemetaan koordinat, DPI, clipboard, verifikasi), **agent loop** (tool calling, approval, stop, pause/resume, pemulihan galat, batas langkah, mismatch penyedia), parser SSE OpenAI, store & enkripsi key, dan **Chromium nyata** (snapshot, isi form, klik, tab, unduhan, log konsol, blokir klik "Kirim"). |
-| `npm run e2e` | Aplikasi Electron **sungguhan** di Xvfb: isolasi renderer, IPC, chat streaming dari mock OpenAI, agen Code menulis berkas setelah persetujuan, Monaco, penolakan, audit tanpa bocor key; **Control nyata**: screenshot → klik → ketik → Enter pada jendela xterm (diverifikasi lewat berkas yang ditulis xterm & posisi pointer X server), `list/focus/close` jendela lewat window manager, persetujuan tiap aksi, pratinjau live. Dapat dijalankan pada build terpasang: `IT7_APP_EXE=dist/linux-unpacked/intelligence-7mit-desktop npm run e2e`. |
+| `IT7_LIVE=1 npx vitest run tests/live-backend.test.ts` | Uji LIVE ke backend intelligence.7mit: Code mode teks membuat berkas nyata (butuh internet; tidak jalan di CI). |
+| `npm run e2e` | Aplikasi Electron **sungguhan** di Xvfb: isolasi renderer, IPC, chat streaming dari mock OpenAI, agen Code menulis berkas setelah persetujuan, Monaco, penolakan, audit tanpa bocor key; **Control nyata**: screenshot → klik → ketik → Enter pada jendela xterm (diverifikasi lewat berkas yang ditulis xterm & posisi pointer X server), `list/focus/close` jendela lewat window manager, persetujuan tiap aksi, pratinjau live. Dapat dijalankan pada build terpasang: `IT7_APP_EXE=dist/linux-unpacked/intelligence-7mit npm run e2e`. |
 | CI | `desktop-ci.yml`: typecheck + tes + build di Ubuntu, **Windows, macOS**; E2E Linux. |
 
 ## Yang BELUM / tidak dapat diuji di lingkungan pengembangan ini

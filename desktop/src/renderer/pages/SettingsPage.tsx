@@ -94,7 +94,7 @@ export function SettingsPage() {
 
         <div className="card stack">
           <h3>Tentang</h3>
-          <div style={{ color: 'var(--muted)' }}>intelligence.7mit 6 Desktop v{info?.version} • {info?.platform}/{info?.arch} • {info?.packaged ? 'build terpasang' : 'mode pengembangan'}</div>
+          <div style={{ color: 'var(--muted)' }}>intelligence.7mit v{info?.version} • {info?.platform}/{info?.arch} • {info?.packaged ? 'build terpasang' : 'mode pengembangan'}</div>
           <div style={{ color: 'var(--muted)', overflowWrap: 'anywhere' }}>Data: {info?.userData}</div>
           {system?.encryptionNote && <div className="status-banner warn">{system.encryptionNote}</div>}
           <div className="row"><button className="btn" onClick={async () => setUpd((await guard(api.system.checkUpdate())) ?? '')}>Periksa pembaruan</button>{upd && <span>{upd}</span>}<button className="btn" onClick={() => api.system.openExternal('https://intelligence.7mit.org')}>Situs web</button></div>

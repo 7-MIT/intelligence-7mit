@@ -1,4 +1,4 @@
-# intelligence.7mit 6 Desktop
+# intelligence.7mit
 
 Aplikasi desktop (Electron + React + TypeScript) untuk **agen AI yang benar-benar bertindak** di komputer Anda — dengan izin dan kendali penuh pengguna. Pengembangan dari [intelligence.7mit](https://intelligence.7mit.org) versi web (repositori induk: kode web di root repo tidak diubah).
 
@@ -7,7 +7,7 @@ Antarmuka bergaya Claude/Codex dengan **dua mode**:
 | Mode | Kemampuan nyata |
 | --- | --- |
 | **Chat** | Percakapan biasa dengan AI (tanpa akses ke komputer): riwayat per tanggal, pencarian, Markdown + syntax highlighting, lampiran & drag-drop. |
-| **Code** | Agen yang bekerja di proyek Anda. Sub-mode **Plan / Edit / Agent**. Thread menampilkan log aktivitas ala Codex (langkah, diff, persetujuan inline). Panel samping: **Berkas** (explorer + Monaco), **Perubahan** (Git diff/commit), **Terminal**, **Peramban**, **Layar**. Kemampuan tambahan dapat dihidupkan di composer: **Web** (Playwright terisolasi: klik, isi form, screenshot, uji, unduhan) dan **Komputer** (Control: screenshot desktop, mouse, keyboard, aplikasi & jendela, siklus *Observe → Plan → Izin → Act → Verify*, kursor AI dan pil "sedang mengontrol" dengan tombol Berhenti). |
+| **Code** | Agen yang bekerja di proyek Anda (**berfungsi dengan backend bawaan intelligence.7mit**, lihat "Mode teks" di bawah). Sub-mode **Plan / Edit / Agent**. Thread menampilkan log aktivitas ala Codex (langkah, diff, persetujuan inline). Panel samping: **Berkas** (explorer + Monaco), **Perubahan** (Git diff/commit), **Terminal**, **Peramban**, **Layar**. Kemampuan tambahan dapat dihidupkan di composer: **Web** (Playwright terisolasi: klik, isi form, screenshot, uji, unduhan) dan **Komputer** (Control: screenshot desktop, mouse, keyboard, aplikasi & jendela, siklus *Observe → Plan → Izin → Act → Verify*, kursor AI dan pil "sedang mengontrol" dengan tombol Berhenti). |
 
 Semua tindakan terlihat di **Activity Timeline**, bisa di-**Pause / Resume / Stop**, dan melewati **Permission Center** + **audit log**.
 
@@ -26,6 +26,11 @@ npm run dist:mac     # .dmg x64 + arm64 (jalankan di macOS)
 ```
 
 Instal untuk pengguna akhir: **[docs/INSTALL.md](docs/INSTALL.md)**. Keamanan: **[docs/SECURITY.md](docs/SECURITY.md)**. Arsitektur: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**. Pengujian & keterbatasan: **[docs/TESTING.md](docs/TESTING.md)**.
+
+## Code dengan backend bawaan (mode teks)
+
+Backend bawaan (gateway ke agen Hermes) menjalankan tool **di server** dan tidak meneruskan tool calling ke klien, jadi aplikasi memakai **mode teks** untuk Code: aplikasi mengirim struktur proyek + berkas relevan sebagai konteks, AI menjawab dengan blok `<<<FILE path="…">>>` (isi lengkap berkas) dan `<<<RUN>>>` (perintah), lalu **aplikasi** yang menerapkannya di komputer Anda lewat tool nyata — dengan diff, persetujuan, batas folder, filter perintah berbahaya, dan audit yang sama seperti mode tool calling. Hasil (berkas tersimpan / output perintah) dikirim balik ke AI untuk iterasi (maks. 8 putaran).
+Batasan: tanpa **Web** dan **Komputer** (butuh model dengan tool calling + vision; tambahkan penyedia OpenAI-compatible di Pengaturan), dan AI tidak "melihat" hasil kecuali lewat output perintah/berkas yang Anda setujui.
 
 ## Akun & login
 

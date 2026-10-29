@@ -110,7 +110,8 @@ export function buildTools(s: Services): ToolDef[] {
       args: {
         path: { type: 'string', description: 'Path berkas' },
         start_line: { type: 'integer', description: 'Baris awal (1-based)', optional: true, min: 1 },
-        end_line: { type: 'integer', description: 'Baris akhir', optional: true, min: 1 }
+        end_line: { type: 'integer', description: 'Baris akhir', optional: true, min: 1 },
+        raw: { type: 'boolean', description: 'Tanpa nomor baris', optional: true }
       },
       plan(a, ctx) {
         const p = s.fs.resolve(resolvePath(ctx, a.path as string));
@@ -122,6 +123,7 @@ export function buildTools(s: Services): ToolDef[] {
         const from = a.start_line as number | undefined;
         const to = a.end_line as number | undefined;
         if (from || to) text = text.split('\n').slice((from ?? 1) - 1, to ?? undefined).join('\n');
+        if (a.raw) return { ok: true, output: text + (r.truncated ? '\n… (berkas dipotong)' : ''), untrusted: `berkas ${path.basename(a.path as string)}` };
         const numbered = text.split('\n').map((l, i) => `${(from ?? 1) + i}\t${l}`).join('\n');
         return { ok: true, output: numbered + (r.truncated ? '\n… (berkas dipotong)' : ''), untrusted: `berkas ${path.basename(a.path as string)}` };
       }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # E2E di Linux/X11 (Xvfb). Butuh: xvfb, openbox, wmctrl, xterm, xdotool.
 # Menguji aplikasi Electron sungguhan: UI, IPC, agen Code, Control (screenshot/mouse/keyboard/window), izin, audit.
-# Gunakan IT7_APP_EXE=/path/ke/binary untuk menguji build terpasang (mis. dist/linux-unpacked/intelligence-7mit-desktop).
+# Gunakan IT7_APP_EXE=/path/ke/binary untuk menguji build terpasang (mis. dist/linux-unpacked/intelligence-7mit).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [ -n "${IT7_APP_EXE:-}" ] || npm run build

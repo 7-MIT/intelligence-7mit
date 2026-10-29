@@ -32,7 +32,7 @@ function showWindow() {
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 1440, height: 920, minWidth: 1080, minHeight: 680, show: false, backgroundColor: '#05070b', title: 'intelligence.7mit 6 Desktop',
+    width: 1440, height: 920, minWidth: 1080, minHeight: 680, show: false, backgroundColor: '#05070b', title: 'intelligence.7mit',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     icon: path.join(__dirname, '../../resources/icon.png'),
     webPreferences: {
@@ -71,7 +71,7 @@ function setupTray() {
   const icon = nativeImage.createFromPath(path.join(__dirname, '../../resources', process.platform === 'darwin' ? 'trayTemplate.png' : 'tray.png'));
   if (process.platform === 'darwin') icon.setTemplateImage(true);
   tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon);
-  tray.setToolTip('intelligence.7mit 6 Desktop');
+  tray.setToolTip('intelligence.7mit');
   const build = () => Menu.buildFromTemplate([
     { label: 'Buka intelligence.7mit', click: showWindow },
     { label: 'Stop AI sekarang', click: () => { services.manager.stopAll(); services.broker.rejectAll(); } },
