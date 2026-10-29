@@ -135,7 +135,8 @@ export function buildTools(s: Services): ToolDef[] {
         path: { type: 'string', description: 'Folder awal; default workspace', optional: true },
         name: { type: 'string', description: 'Pola nama berkas (glob)', optional: true },
         text: { type: 'string', description: 'Teks yang dicari dalam isi berkas', optional: true },
-        max: { type: 'integer', description: 'Maks hasil', optional: true, min: 1, max: 500 }
+        max: { type: 'integer', description: 'Maks hasil', optional: true, min: 1, max: 500 },
+        relative: { type: 'boolean', description: 'Tampilkan path relatif terhadap folder awal', optional: true }
       },
       plan(a, ctx) {
         if (!a.name && !a.text) throw new Error('Isi "name" atau "text".');
@@ -144,7 +145,13 @@ export function buildTools(s: Services): ToolDef[] {
       },
       async run(a, ctx) {
         const r = await s.fs.search(resolvePath(ctx, (a.path as string) ?? '.'), { name: a.name as string | undefined, text: a.text as string | undefined, max: a.max as number | undefined }, ctx.signal);
-        return { ok: true, output: r.join('\n') || '(tidak ada hasil)', untrusted: 'hasil pencarian' };
+        let lines = r;
+        if (a.relative) {
+          // Akar yang sama dengan yang dipakai pencarian (sudah dinormalisasi: symlink, nama pendek Windows, huruf besar/kecil)
+          const base = s.fs.resolve(resolvePath(ctx, (a.path as string) ?? '.'));
+          lines = r.map((l) => { const m = l.match(/^(.*?)(:\d+)?$/)!; return path.relative(base, m[1]).split(path.sep).join('/') + (m[2] ?? ''); });
+        }
+        return { ok: true, output: lines.join('\n') || '(tidak ada hasil)', untrusted: 'hasil pencarian' };
       }
     },
     {

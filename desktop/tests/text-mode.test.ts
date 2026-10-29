@@ -125,4 +125,19 @@ describe('Code mode teks (penyedia tanpa tool calling, mis. backend bawaan)', ()
     m.start({ mode: 'control', prompt: 'x' });
     await waitFor(() => m.list()[0].status === 'error');
   });
+
+  it('workspace yang dirujuk lewat symlink / nama pendek (mis. RUNNER~1 di Windows) tetap menghasilkan konteks proyek', async () => {
+    const h = harness({ grants: { filesystem: true }, autoApprove: true });
+    fs.writeFileSync(path.join(h.ws, 'README.md'), '# Lewat symlink');
+    const link = path.join(h.dir, 'ws-link');
+    try { fs.symlinkSync(h.ws, link, 'junction'); } catch { return; } // tanpa izin symlink: lewati
+    const seen: string[] = [];
+    const p = new ScriptedProvider((req) => { seen.push(String(req.messages.at(-1)?.content)); return { content: 'ok', toolCalls: [], finishReason: 'stop' }; }, NO_TOOLS);
+    const m = makeManager(h, p);
+    (m as unknown as { d: { getWorkspace: (id: string) => unknown } }).d.getWorkspace = () => ({ id: 'w1', name: 'ws', path: link });
+    m.start({ mode: 'code', submode: 'edit', prompt: 'x', workspaceId: 'w1' });
+    await waitFor(() => m.list()[0].status === 'done');
+    expect(seen[0]).toContain('README.md');
+    expect(seen[0]).toContain('# Lewat symlink');
+  });
 });

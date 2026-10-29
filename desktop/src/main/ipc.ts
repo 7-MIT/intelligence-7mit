@@ -97,7 +97,7 @@ export function registerIpc(s: Services, hooks: IpcHooks) {
       if (!path.isAbsolute(f) || !fs.existsSync(f) || !fs.statSync(f).isDirectory()) throw new Error(`Folder tidak valid: ${f}`);
       if (path.dirname(f) === f) throw new Error('Root drive tidak boleh diizinkan');
     }
-    const norm = (l?: string[]) => l?.map((f) => fs.realpathSync(f));
+    const norm = (l?: string[]) => l?.map((f) => fs.realpathSync.native(f));
     const clean = { ...patch, allowedFolders: norm(patch.allowedFolders), autoWorkspaces: norm(patch.autoWorkspaces) };
     return s.permissions.update(clean);
   });
@@ -154,11 +154,11 @@ export function registerIpc(s: Services, hooks: IpcHooks) {
   handle(CH.wsPick, null, async () => {
     const win = hooks.getWindow();
     const r = await dialog.showOpenDialog(win!, { properties: ['openDirectory', 'createDirectory'], title: 'Pilih folder workspace' });
-    return r.canceled ? null : fs.realpathSync(r.filePaths[0]);
+    return r.canceled ? null : fs.realpathSync.native(r.filePaths[0]);
   });
   handle(CH.wsAdd, schemas.wsAdd, ({ name, path: p }) => {
     if (!path.isAbsolute(p) || !fs.existsSync(p) || !fs.statSync(p).isDirectory()) throw new Error('Folder tidak valid');
-    return s.store.addWorkspace(name, fs.realpathSync(p));
+    return s.store.addWorkspace(name, fs.realpathSync.native(p));
   });
   handle(CH.wsRemove, schemas.idOnly, ({ id }) => s.store.removeWorkspace(id));
 

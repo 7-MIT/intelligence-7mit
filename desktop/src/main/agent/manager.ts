@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-import path from 'node:path';
 import type { AgentEvent, AgentMode, TaskCaps, ApprovalRequest, PlanStep, Settings, TaskStatus, TaskSummary, TimelineEvent, Workspace } from '@shared/types';
 import type { TaskStartInput } from '@shared/ipc';
 import type { PermissionManager } from '../security/permissions';
@@ -181,11 +180,9 @@ export class AgentTaskManager {
     let tree = '';
     const files: { path: string; wrapped: string }[] = [];
     if (workspace) {
-      const list = await this.d.executor.execute('search_files', { path: '.', name: '*', max: 300 }, ctx);
+      const list = await this.d.executor.execute('search_files', { path: '.', name: '*', max: 300, relative: true }, ctx);
       if (list.ok) {
-        // path.relative aman lintas OS (backslash & huruf besar/kecil di Windows)
-        const rel = list.output.split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('<') && !l.startsWith('[PERINGATAN') && path.isAbsolute(l))
-          .map((l) => path.relative(workspace.path, l).split(path.sep).join('/')).filter((r) => r && !r.startsWith('..'));
+        const rel = list.output.split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('<') && !l.startsWith('[PERINGATAN') && !l.startsWith('..'));
         tree = rel.join('\n');
         const prompt = input.prompt.toLowerCase();
         const pick = new Set<string>();

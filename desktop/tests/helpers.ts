@@ -39,7 +39,7 @@ export class FakeDriver implements InputDriver {
 
 export function harness(opts: { grants?: Partial<PermissionState['grants']>; mode?: PermissionState['mode']; autoApprove?: boolean | 'manual' | ((r: ApprovalRequest) => boolean) } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'it7-'));
-  const ws = fs.realpathSync(fs.mkdtempSync(path.join(dir, 'ws-')));
+  const ws = fs.realpathSync.native(fs.mkdtempSync(path.join(dir, 'ws-')));
   const events: AgentEvent[] = [];
   const approvals: ApprovalRequest[] = [];
   const audit = new AuditLogger(path.join(dir, 'audit.jsonl'));
