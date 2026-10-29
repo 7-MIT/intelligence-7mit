@@ -27,6 +27,14 @@ npm run dist:mac     # .dmg x64 + arm64 (jalankan di macOS)
 
 Instal untuk pengguna akhir: **[docs/INSTALL.md](docs/INSTALL.md)**. Keamanan: **[docs/SECURITY.md](docs/SECURITY.md)**. Arsitektur: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**. Pengujian & keterbatasan: **[docs/TESTING.md](docs/TESTING.md)**.
 
+## Akun & login
+
+Saat pertama dibuka, aplikasi menampilkan layar login yang sama pilihannya dengan `intelligence.7mit.org/auth/`: **email + kata sandi** (masuk/daftar/lupa kata sandi), **akun.7mit** (username + kata sandi, termasuk pilih akun), atau **lanjut sebagai tamu**.
+- Riwayat **Chat** tersinkron dua arah dengan akun web (tabel `intellegence_chat_history` yang sama; yang lebih baru menang). Percakapan **Code** selalu lokal.
+- Token sesi disimpan terenkripsi di proses utama (`safeStorage`), tidak pernah dikirim ke UI. Bila enkripsi OS tidak tersedia, sesi hanya di memori dan UI memberi tahu.
+- **Keluar** mendorong perubahan terakhir, mencabut sesi di server, dan menghapus riwayat Chat lokal agar tidak tercampur ke akun lain di komputer yang sama (data tetap ada di akun).
+- Mode tamu: semua lokal, tanpa sinkron. Login OAuth/redirect tidak dipakai (tidak butuh konfigurasi redirect Supabase).
+
 ## Penyedia AI
 
 - **intelligence.7mit (bawaan)** — memakai backend Supabase Edge Function yang sudah dipakai versi web (kunci *publishable* publik yang sama dengan frontend web). **Hanya chat teks**: tidak mendukung tool calling maupun vision.

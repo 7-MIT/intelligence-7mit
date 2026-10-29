@@ -48,5 +48,13 @@ export const CH = {
   updateCheck: 'update:check',
   agentEvent: 'agent:event',
   termData: 'term:data',
+  authStatus: 'auth:status',
+  authSignIn: 'auth:signIn',
+  authSignUp: 'auth:signUp',
+  authRecover: 'auth:recover',
+  authSso: 'auth:sso',
+  authSignOut: 'auth:signOut',
+  authGuest: 'auth:guest',
+  historySync: 'history:sync',
   navigate: 'app:navigate'
 } as const;

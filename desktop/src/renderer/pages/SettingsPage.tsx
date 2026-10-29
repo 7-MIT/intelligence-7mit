@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import type { ProviderConfig } from '@shared/types';
 import { Dropdown, Switch } from '@/components/ui';
 import { api } from '@/lib/api';
-import { guard, refreshAll, store, toast, updateSettings } from '@/lib/state';
+import { guard, refreshAll, store, syncHistory, toast, updateSettings } from '@/lib/state';
+import { AuthGate } from '@/components/AuthGate';
 
 function ProviderCard({ p }: { p: ProviderConfig }) {
   const [form, setForm] = useState({ name: p.name, baseUrl: p.baseUrl, model: p.model, supportsTools: p.supportsTools, supportsVision: p.supportsVision });
@@ -48,6 +49,8 @@ export function SettingsPage() {
   const providers = store.use((x) => x.providers);
   const info = store.use((x) => x.info);
   const system = store.use((x) => x.system);
+  const auth = store.use((x) => x.auth);
+  const [login, setLogin] = useState(false);
   const [upd, setUpd] = useState('');
   const [shortcut, setShortcut] = useState(s.globalShortcut);
   useEffect(() => setShortcut(s.globalShortcut), [s.globalShortcut]);
@@ -55,6 +58,24 @@ export function SettingsPage() {
     <>
       <div className="topbar"><h2 className="display">Pengaturan</h2></div>
       <div className="page"><div className="pad stack">
+        <div className="card stack">
+          <h3>Akun</h3>
+          {auth?.status === 'user' ? (
+            <>
+              <div><b>{auth.profile?.display_name}</b>{auth.email && <span style={{ color: 'var(--muted)' }}> · {auth.email}</span>}<br /><span className="chip blue">{auth.profile?.provider === 'akun7mit' ? 'akun.7mit' : 'Email'}</span>{auth.profile?.role && <span className="chip" style={{ marginLeft: 6 }}>{auth.profile.role}</span>}</div>
+              {auth.persisted === false && <div className="status-banner warn">Enkripsi OS tidak tersedia: sesi login hanya di memori dan hilang saat aplikasi ditutup.</div>}
+              <p className="sub" style={{ margin: 0 }}>Riwayat <b>Chat</b> tersinkron dengan akun web (tabel yang sama). Percakapan <b>Code</b> tetap lokal di komputer ini.</p>
+              <div className="row"><button className="btn" onClick={() => syncHistory()}>Sinkronkan sekarang</button><button className="btn danger" onClick={async () => { if (confirm('Keluar dari akun? Riwayat Chat di komputer ini akan dihapus (tetap tersimpan di akun Anda). Percakapan Code tidak terpengaruh.')) { const st = await guard(api.auth.signOut()); if (st) store.set({ auth: st }); } }}>Keluar</button></div>
+            </>
+          ) : (
+            <>
+              <p className="sub" style={{ margin: 0 }}>Anda memakai <b>mode tamu</b>: riwayat hanya di komputer ini. Masuk untuk menyinkronkan riwayat Chat dengan akun intelligence.7mit.</p>
+              <div><button className="btn primary" onClick={() => setLogin(true)}>Masuk / daftar</button></div>
+            </>
+          )}
+        </div>
+        {login && <AuthGate onClose={() => setLogin(false)} />}
+
         <div className="card stack">
           <h3>Tampilan & perilaku</h3>
           <div className="grid2">

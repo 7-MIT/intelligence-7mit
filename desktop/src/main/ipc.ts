@@ -44,6 +44,22 @@ export function registerIpc(s: Services, hooks: IpcHooks) {
     if (!d.allowed) throw new Error(d.reason);
   };
 
+  // Akun (token tidak pernah dikirim ke renderer)
+  const syncAfterLogin = async () => { try { await s.history.sync(); } catch (e) { return (e as Error).message; } return undefined; };
+  handle(CH.authStatus, null, () => s.auth.state());
+  handle(CH.authSignIn, schemas.authEmail, async ({ email, password }) => { await s.auth.signIn(email, password); s.audit.log({ actor: 'user', tool: 'auth.signin', decision: 'ok', summary: 'Masuk dengan email' }); return { state: s.auth.state(), syncError: await syncAfterLogin() }; });
+  handle(CH.authSignUp, schemas.authEmail, async ({ email, password }) => { const direct = await s.auth.signUp(email, password); return { signedIn: direct, state: s.auth.state(), syncError: direct ? await syncAfterLogin() : undefined }; });
+  handle(CH.authRecover, schemas.authRecover, async ({ email }) => { await s.auth.recover(email); });
+  handle(CH.authSso, schemas.authSso, async ({ username, password, accountKey }) => { const r = await s.auth.ssoSignIn(username, password, accountKey); if (r.requiresSelection) return { ...r, state: s.auth.state() }; s.audit.log({ actor: 'user', tool: 'auth.sso', decision: 'ok', summary: 'Masuk dengan akun.7mit' }); return { ...r, state: s.auth.state(), syncError: await syncAfterLogin() }; });
+  handle(CH.authGuest, null, () => { s.auth.continueAsGuest(); return s.auth.state(); });
+  handle(CH.authSignOut, null, async () => {
+    // Dorong perubahan terakhir, lalu bersihkan riwayat Chat lokal agar tidak bocor ke akun lain di komputer yang sama.
+    await s.history.sync().catch(() => undefined);
+    s.history.flush();
+    for (const c of s.store.listConversations()) if (c.mode === 'chat') s.store.deleteConversation(c.id);
+    await s.auth.signOut(); s.audit.log({ actor: 'user', tool: 'auth.signout', decision: 'ok', summary: 'Keluar dari akun' }); return s.auth.state(); });
+  handle(CH.historySync, null, async () => s.history.sync());
+
   // Pengaturan & sistem
   handle(CH.settingsGet, null, () => s.store.getSettings());
   handle(CH.settingsSet, schemas.settingsSet, (patch) => { const n = s.store.setSettings(patch); hooks.applySettings(); return n; });
@@ -131,8 +147,8 @@ export function registerIpc(s: Services, hooks: IpcHooks) {
   // Percakapan & workspace
   handle(CH.convList, null, () => s.store.listConversations());
   handle(CH.convGet, schemas.idOnly, ({ id }) => s.store.getConversation(id) ?? null);
-  handle(CH.convSave, schemas.convSave, (c) => { s.store.saveConversation(c); s.store.setSession({ activeConversationId: c.id }); });
-  handle(CH.convDelete, schemas.idOnly, ({ id }) => s.store.deleteConversation(id));
+  handle(CH.convSave, schemas.convSave, (c) => { s.store.saveConversation(c); s.store.setSession({ activeConversationId: c.id }); s.history.schedulePush(c); });
+  handle(CH.convDelete, schemas.idOnly, async ({ id }) => { s.store.deleteConversation(id); await s.history.remove(id); });
   handle(CH.convSearch, schemas.search, ({ query }) => s.store.searchConversations(query));
   handle(CH.wsList, null, () => s.store.listWorkspaces());
   handle(CH.wsPick, null, async () => {

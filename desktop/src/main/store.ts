@@ -84,6 +84,26 @@ export class Store {
     try { return this.crypto.decrypt(enc); } catch { return undefined; }
   }
 
+  // Akun: sesi login terenkripsi (safeStorage); status tamu bukan rahasia.
+  private authMem: import('./auth').StoredAuth['session'] | undefined;
+  loadAuth(): import('./auth').StoredAuth | undefined {
+    const raw = readJson<{ guest?: boolean; profile?: import('./auth').AuthProfile; session?: string } | undefined>(this.f('auth.json'), undefined);
+    if (!raw) return undefined;
+    let session;
+    if (raw.session) { try { session = JSON.parse(this.crypto.decrypt(raw.session)); } catch { /* tak terbaca: login ulang */ } }
+    return session ? { session, profile: raw.profile } : raw.guest ? { guest: true, profile: raw.profile } : undefined;
+  }
+  saveAuth(a: import('./auth').StoredAuth | undefined): { persisted: boolean } {
+    if (!a) { try { fs.rmSync(this.f('auth.json')); } catch { /* belum ada */ } return { persisted: true }; }
+    if (a.session) {
+      if (!this.crypto.available()) { try { fs.rmSync(this.f('auth.json')); } catch { /* belum ada */ } return { persisted: false }; }
+      writeJson(this.f('auth.json'), { profile: a.profile, session: this.crypto.encrypt(JSON.stringify(a.session)) });
+      return { persisted: true };
+    }
+    writeJson(this.f('auth.json'), { guest: true, profile: a.profile });
+    return { persisted: true };
+  }
+
   // Workspace
   listWorkspaces(): Workspace[] { return readJson<Workspace[]>(this.f('workspaces.json'), []); }
   addWorkspace(name: string, p: string): Workspace {

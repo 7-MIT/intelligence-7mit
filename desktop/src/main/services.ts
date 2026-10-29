@@ -16,10 +16,11 @@ import { AuditLogger } from './security/audit';
 import { PathGuard } from './security/paths';
 import { PermissionManager } from './security/permissions';
 import { Store } from './store';
+import { AuthService, SUPABASE_KEY, setTestBaseUrl } from './auth';
+import { HistorySync } from './history-sync';
 import { ToolExecutor } from './tools/executor';
 import { buildTools } from './tools/definitions';
 
-const SUPABASE_ANON = 'sb_publishable_yGZ90Bkv3yreqc9pA55bpw_YKKBhWRw'; // kunci publishable milik web app (publik, bukan rahasia)
 
 export function createServices(emit: (e: AgentEvent) => void) {
   const dir = app.getPath('userData');
@@ -28,6 +29,9 @@ export function createServices(emit: (e: AgentEvent) => void) {
     encrypt: (s) => safeStorage.encryptString(s).toString('base64'),
     decrypt: (s) => safeStorage.decryptString(Buffer.from(s, 'base64'))
   });
+  if (!app.isPackaged && process.env.IT7_E2E === '1' && process.env.IT7_SUPABASE_URL) setTestBaseUrl(process.env.IT7_SUPABASE_URL);
+  const auth = new AuthService({ load: () => store.loadAuth(), save: (a) => store.saveAuth(a) });
+  const history = new HistorySync(auth, store);
   const audit = new AuditLogger(path.join(dir, 'audit', 'audit.jsonl'));
   let taskOf = new Map<string, string | undefined>();
   let manager: AgentTaskManager;
@@ -65,7 +69,7 @@ export function createServices(emit: (e: AgentEvent) => void) {
   const getProvider = (): LLMProvider => {
     const s = store.getSettings();
     const cfg = store.getProvider(s.activeProviderId) ?? store.listProviders()[0];
-    return cfg.kind === 'intelligence7mit' ? new SevenMitProvider(cfg, SUPABASE_ANON) : new OpenAICompatProvider(cfg, () => store.getKey(cfg.id));
+    return cfg.kind === 'intelligence7mit' ? new SevenMitProvider(cfg, SUPABASE_KEY, fetch, { token: () => auth.accessToken(), context: () => auth.accountContext() }) : new OpenAICompatProvider(cfg, () => store.getKey(cfg.id));
   };
 
   manager = new AgentTaskManager({
@@ -76,7 +80,7 @@ export function createServices(emit: (e: AgentEvent) => void) {
     emit, platform: process.platform
   });
 
-  return { store, audit, broker, permissions, guard, fsAgent, term, driver, screenSvc, previewSvc, mouse, browser, executor, manager, getProvider };
+  return { auth, history, store, audit, broker, permissions, guard, fsAgent, term, driver, screenSvc, previewSvc, mouse, browser, executor, manager, getProvider };
 }
 
 export type Services = ReturnType<typeof createServices>;

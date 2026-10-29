@@ -5,20 +5,38 @@ import os from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { startMock } from './mock-llm.mjs';
+import { startSupabase } from './mock-supabase.mjs';
 
 const shots = process.env.SHOTS_DIR || path.join(os.tmpdir(), 'it7-shots');
 fs.mkdirSync(shots, { recursive: true });
 const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'it7-ud-'));
 const ws = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'it7-ws-')));
 const mock = await startMock();
+const sb = await startSupabase();
 // Izin diseed ke berkas agar bisa dipakai pada build terpasang (dialog konfirmasi native tidak bisa diklik otomatis).
 fs.writeFileSync(path.join(userData, 'permissions.json'), JSON.stringify({ grants: { screen: false, input: false, terminal: true, filesystem: true, browser: false, apps: false }, mode: 'ask', allowedFolders: [ws], autoWorkspaces: [], allowScreenshotUpload: false }));
 
-const app = await electron.launch({ ...(process.env.IT7_APP_EXE ? { executablePath: process.env.IT7_APP_EXE } : {}), args: [...(process.env.IT7_APP_EXE ? [] : ['.']), '--no-sandbox', `--user-data-dir=${userData}`], env: { ...process.env, IT7_E2E: '1' }, cwd: process.cwd() });
+const app = await electron.launch({ ...(process.env.IT7_APP_EXE ? { executablePath: process.env.IT7_APP_EXE } : {}), args: [...(process.env.IT7_APP_EXE ? [] : ['.']), '--no-sandbox', `--user-data-dir=${userData}`], env: { ...process.env, IT7_E2E: '1', IT7_SUPABASE_URL: `http://127.0.0.1:${sb.port}` }, cwd: process.cwd() });
 const page = await app.firstWindow();
 page.on('pageerror', (e) => console.error('[pageerror]', e.message));
+page.on('dialog', (d) => d.accept());
 try {
-await page.waitForSelector('aside >> text=Permission Center', { timeout: 30000 });
+await page.waitForSelector('[role=dialog][aria-label=Masuk]', { timeout: 30000 });
+await page.screenshot({ path: path.join(shots, '00-login.png') });
+console.log('✓ layar login tampil pada peluncuran pertama');
+// login gagal -> pesan jelas
+await page.fill('input[aria-label=Email]', 'ayu@contoh.id');
+await page.fill('input[aria-label="Kata sandi"]', 'salahsalah');
+await page.click('button:has-text("Masuk dengan email")');
+await page.waitForSelector('text=Email atau kata sandi salah.');
+// login berhasil -> riwayat web tersinkron
+await page.fill('input[aria-label="Kata sandi"]', 'rahasia123');
+await page.click('button:has-text("Masuk dengan email")');
+await page.waitForSelector('aside >> text=Chat dari web', { timeout: 15000 });
+await page.waitForSelector('.userchip >> text=Ayu');
+const stAuth = await page.evaluate(() => window.it7.auth.status());
+assert.equal(stAuth.status, 'user'); assert.ok(!JSON.stringify(stAuth).includes('E2E-JWT'), 'token tidak boleh sampai renderer');
+console.log('✓ login email berhasil; riwayat Chat dari akun web tertarik; token tidak ke renderer');
 await page.screenshot({ path: path.join(shots, '01-chat.png') });
 console.log('✓ UI termuat');
 
@@ -51,6 +69,9 @@ await page.waitForSelector('text=balasan tiruan', { timeout: 15000 });
 await page.screenshot({ path: path.join(shots, '02-chat-reply.png') });
 console.log('✓ chat streaming dari endpoint OpenAI-compatible');
 assert.equal(mock.seen.at(-1).auth, 'Bearer sk-e2e-test-key-0123456789');
+await page.waitForTimeout(1500);
+assert.ok(sb.state.posts.flat().some((r) => r.messages.some((m) => m.content === 'halo')), 'chat baru harus tersinkron ke akun');
+console.log('✓ chat baru dikirim ke tabel riwayat akun');
 
 // Code agent: tool call -> persetujuan -> berkas ditulis
 await page.click('.modeseg button:has-text("Code")');
@@ -115,13 +136,31 @@ console.log('✓ API key tidak pernah mencapai renderer / berkas teks biasa');
 await page.click('.modeseg button:has-text("Code")');
 await page.waitForTimeout(800);
 await page.screenshot({ path: path.join(shots, '09-code.png') });
+
+// Keluar: riwayat Chat lokal dibersihkan, sesi dicabut di server, layar login kembali
+await page.click('aside >> text=Pengaturan');
+await page.waitForSelector('text=Sinkronkan sekarang');
+await page.screenshot({ path: path.join(shots, '10-account.png') });
+await page.click('button:text-is("Keluar")');
+await page.waitForSelector('[role=dialog][aria-label=Masuk]');
+await page.waitForTimeout(500);
+assert.equal(sb.state.loggedOut, true);
+const chats = await page.evaluate(() => window.it7.conv.list());
+assert.ok(!chats.some((c) => c.mode === 'chat'), 'riwayat Chat lokal harus dibersihkan setelah keluar');
+assert.ok(chats.some((c) => c.mode === 'code'), 'percakapan Code tetap ada');
+console.log('✓ keluar: sesi dicabut, riwayat Chat lokal dibersihkan, Code tetap ada');
+await page.click('button:has-text("Lanjut sebagai tamu")');
+await page.waitForSelector('aside >> text=Permission Center');
+console.log('✓ mode tamu tanpa login');
 await app.close();
 mock.server.close();
+sb.server.close();
 console.log('SEMUA UJI E2E LULUS');
 } catch (e) {
   console.error('GAGAL:', e.message.split('\n')[0]);
   await page.screenshot({ path: path.join(shots, 'FAIL.png') }).catch(() => {});
   await app.close().catch(() => {});
   mock.server.close();
+  sb.server.close();
   process.exit(1);
 }

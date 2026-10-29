@@ -4,7 +4,15 @@ import type {
 import type { TaskStartInput } from '@shared/ipc';
 
 type Fn<A = void, R = unknown> = (arg?: A) => Promise<R>;
+export interface AuthState { status: 'none' | 'guest' | 'user'; profile?: { display_name: string; provider: 'email' | 'akun7mit' | 'guest'; role?: string; account_type?: string }; email?: string; persisted?: boolean }
 interface Api {
+  auth: {
+    status: Fn<void, AuthState>; signIn: Fn<{ email: string; password: string }, { state: AuthState; syncError?: string }>;
+    signUp: Fn<{ email: string; password: string }, { signedIn: boolean; state: AuthState; syncError?: string }>; recover: Fn<{ email: string }>;
+    sso: Fn<{ username: string; password: string; accountKey?: string }, { requiresSelection: boolean; accounts?: { account_key: string; display_name: string; account_type: string; role: string }[]; state: AuthState; syncError?: string }>;
+    signOut: Fn<void, AuthState>; guest: Fn<void, AuthState>;
+  };
+  history: { sync: Fn<void, { pulled: number; pushed: number }> };
   settings: { get: Fn<void, Settings>; set: Fn<Partial<Settings>, Settings> };
   system: { status: Fn<void, SystemStatus>; info: Fn<void, { version: string; platform: string; arch: string; packaged: boolean; userData: string; crashed: boolean }>; openExternal(url: string): Promise<void>; checkUpdate: Fn<void, string> };
   perm: { get: Fn<void, PermissionState>; set: Fn<Partial<Omit<PermissionState, 'grants'>> & { grants?: Partial<PermissionState['grants']> }, PermissionState>; requestMac: Fn<void, { ok: boolean; message: string }>; respond: Fn<{ id: string; approved: boolean; remember?: boolean }, boolean> };
