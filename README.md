@@ -9,6 +9,10 @@ Frontend statis untuk asisten AI **intelligence.7mit** (HTML, CSS, JavaScript, T
 | Pengaturan | `/chat/pengaturan/` |
 | Login | `/auth/` |
 
+## Aplikasi desktop — intelligence.7mit 6 Desktop
+
+Folder [`desktop/`](desktop/README.md) berisi aplikasi desktop Windows/macOS (Electron + React + TypeScript): agen **Code**, **Web** (Playwright), dan **Control** (kontrol komputer dengan izin pengguna). Frontend web di root repo tetap tidak berubah. Lihat [desktop/README.md](desktop/README.md), [panduan instalasi](desktop/docs/INSTALL.md), dan [panduan keamanan](desktop/docs/SECURITY.md).
+
 ## Menjalankan lokal
 
 ```bash

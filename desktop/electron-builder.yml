@@ -1,0 +1,70 @@
+appId: org.mit7.intelligence.desktop
+productName: intelligence.7mit 6 Desktop
+copyright: © 7 MIT
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - package.json
+  - resources/**
+asar: true
+asarUnpack:
+  - node_modules/@nut-tree-fork/**
+  - resources/**
+extraResources: []
+npmRebuild: false
+publish:
+  provider: github
+  owner: 7-MIT
+  repo: intelligence-7mit
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: intelligence-7mit-6-desktop-${version}-win-${arch}.${ext}
+  # Tanda tangan kode: aktif otomatis bila CSC_LINK / CSC_KEY_PASSWORD tersedia (lihat docs/SECURITY.md). Tidak ada tanda tangan palsu.
+  signAndEditExecutable: true
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: intelligence.7mit 6 Desktop
+  uninstallDisplayName: intelligence.7mit 6 Desktop
+  deleteAppDataOnUninstall: false
+
+mac:
+  icon: build/icon.png
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip # dipakai auto-update macOS
+      arch: [x64, arm64]
+  artifactName: intelligence-7mit-6-desktop-${version}-mac-${arch}.${ext}
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    NSScreenCaptureUsageDescription: intelligence.7mit Control membutuhkan izin merekam layar agar AI dapat melihat layar Anda atas izin Anda.
+    NSAppleEventsUsageDescription: intelligence.7mit mengendalikan jendela aplikasi atas izin Anda.
+    NSAccessibilityUsageDescription: intelligence.7mit Control membutuhkan Accessibility untuk mengklik dan mengetik atas izin Anda.
+  # Notarisasi: aktif bila APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID tersedia.
+dmg:
+  title: intelligence.7mit 6 Desktop ${version}
+  contents:
+    - { x: 130, y: 220 }
+    - { x: 410, y: 220, type: link, path: /Applications }
+
+linux:
+  icon: build/icon.png
+  category: Development
+  target:
+    - target: AppImage
+      arch: [x64]
+  artifactName: intelligence-7mit-6-desktop-${version}-linux-${arch}.${ext}
