@@ -118,9 +118,9 @@ export function CompatBanner({ mode }: { mode: 'chat' | 'code' }) {
   if (mode === 'chat' || c.tools) return null;
   return (
     <div className="composer" style={{ paddingBottom: 0 }}>
-      <div className="status-banner warn" style={{ maxWidth: 780, margin: '0 auto' }}>
-        <AlertTriangle size={15} />Penyedia aktif ({p?.name ?? '—'}) tidak mendukung tool calling, jadi Code tidak dapat bertindak. Pilih/tambahkan penyedia OpenAI-compatible di Pengaturan.
-        <button className="btn sm" onClick={() => setPage('settings')}>Pengaturan</button>
+      <div className="status-banner" style={{ maxWidth: 780, margin: '0 auto', background: 'var(--accent-soft)', border: '1px solid rgba(122,162,255,.3)', color: 'var(--blue)' }}>
+        <AlertTriangle size={15} /><span><b>Mode teks.</b> {p?.name ?? 'Penyedia ini'} tidak punya tool calling, jadi AI mengusulkan berkas &amp; perintah dan aplikasi menerapkannya setelah Anda setujui (diff ditampilkan). Web &amp; Komputer butuh model dengan tool calling.</span>
+        <button className="btn sm" onClick={() => setPage('settings')}>Penyedia</button>
       </div>
     </div>
   );

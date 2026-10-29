@@ -1,8 +1,8 @@
 {
-  "name": "intelligence-7mit-desktop",
-  "productName": "intelligence.7mit 6 Desktop",
-  "version": "6.0.0",
-  "description": "intelligence.7mit 6 Desktop — AI agent untuk coding, web, dan kontrol komputer dengan izin pengguna.",
+  "name": "intelligence-7mit",
+  "productName": "intelligence.7mit",
+  "version": "1.0.0",
+  "description": "intelligence.7mit — AI agent untuk coding, web, dan kontrol komputer dengan izin pengguna.",
   "author": {
     "name": "7 MIT",
     "email": "halo@7mit.org"

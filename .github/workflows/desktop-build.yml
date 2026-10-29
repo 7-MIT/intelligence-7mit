@@ -1,6 +1,6 @@
 name: Desktop Build (Windows & macOS)
 
-# Membangun installer intelligence.7mit 6 Desktop:
+# Membangun installer intelligence.7mit:
 #   Windows x64  -> NSIS .exe
 #   macOS        -> .dmg (Intel x64 + Apple Silicon arm64) + .zip (untuk auto-update)
 # Hasil tersedia sebagai Artifacts; pada tag `desktop-v*` (atau input publish) juga dibuat GitHub Release (draft).
@@ -88,7 +88,7 @@ jobs:
           else echo "SIGNED — ditandatangani dengan sertifikat dari secrets CSC_LINK." | tee dist/SIGNING-STATUS.txt; fi
       - uses: actions/upload-artifact@v4
         with:
-          name: intelligence-7mit-6-desktop-${{ runner.os }}
+          name: intelligence-7mit-${{ runner.os }}
           path: |
             ${{ matrix.globs }}
             desktop/dist/SIGNING-STATUS.txt
@@ -102,6 +102,12 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: desktop/package.json
+      - name: Baca versi aplikasi
+        id: ver
+        run: echo "version=$(node -p "require('./desktop/package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v4
         with:
           path: release
@@ -109,9 +115,9 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           draft: true
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('desktop-v{0}', github.run_number) }}
-          name: intelligence.7mit 6 Desktop ${{ github.ref_name }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('desktop-v{0}', steps.ver.outputs.version) }}
+          name: intelligence.7mit ${{ steps.ver.outputs.version }}
           body: |
-            Installer intelligence.7mit 6 Desktop.
+            Installer intelligence.7mit.
             Lihat `SIGNING-STATUS.txt` untuk status tanda tangan. Build tanpa tanda tangan memunculkan peringatan SmartScreen (Windows) / Gatekeeper (macOS); panduan ada di docs/INSTALL.md.
           files: release/*

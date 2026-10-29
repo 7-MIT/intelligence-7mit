@@ -6,7 +6,7 @@ Unduh installer dari **GitHub Actions → Desktop Build → Artifacts** atau dar
 
 ## Windows (10/11 x64)
 
-1. Jalankan `intelligence-7mit-6-desktop-<versi>-win-x64.exe`.
+1. Jalankan `intelligence-7mit-<versi>-win-x64.exe`.
 2. Bila SmartScreen muncul pada build tak bertanda tangan: **More info → Run anyway** (hanya jika Anda memercayai sumbernya).
 3. Pilih folder instalasi. Installer membuat shortcut Desktop dan Start Menu; uninstaller tersedia di *Settings → Apps*.
 4. **Windows ARM64**: tidak ada build native karena modul otomasi input (`libnut`) hanya tersedia untuk x64. Windows 11 ARM64 menjalankan build x64 lewat emulasi; Control belum diuji pada ARM64.
@@ -15,7 +15,7 @@ Unduh installer dari **GitHub Actions → Desktop Build → Artifacts** atau dar
 ## macOS (Apple Silicon & Intel)
 
 1. Buka `.dmg` yang sesuai (`-mac-arm64` untuk M1/M2/M3/M4, `-mac-x64` untuk Intel), seret aplikasi ke **Applications**.
-2. Build tak bertanda tangan/ternotarisasi: klik kanan aplikasi → **Open**, atau `xattr -dr com.apple.quarantine "/Applications/intelligence.7mit 6 Desktop.app"`.
+2. Build tak bertanda tangan/ternotarisasi: klik kanan aplikasi → **Open**, atau `xattr -dr com.apple.quarantine "/Applications/intelligence.7mit.app"`.
 3. Untuk **Control**, berikan izin di **System Settings → Privacy & Security**:
    - **Screen Recording** (screenshot) dan **Accessibility** (mouse/keyboard, daftar jendela).
    - Gunakan tombol *Permission Center → Minta izin Accessibility & Screen Recording*, lalu **mulai ulang** aplikasi.
