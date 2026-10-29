@@ -1,0 +1,64 @@
+name: Desktop CI
+
+on:
+  push:
+    paths: ['desktop/**', '.github/workflows/desktop-*.yml']
+  pull_request:
+    paths: ['desktop/**', '.github/workflows/desktop-*.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Typecheck, unit test, build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  e2e-linux:
+    name: E2E Linux (Xvfb + Control nyata)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - name: Dependensi sistem untuk E2E
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb openbox wmctrl xterm xdotool imagemagick
+      - run: npm ci
+      - run: npx playwright-core install --with-deps chromium
+      - run: npm test
+      - name: E2E (smoke + Control)
+        run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-screenshots
+          path: /tmp/it7-shots/*.png
+          if-no-files-found: ignore

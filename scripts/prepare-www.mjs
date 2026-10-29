@@ -1,7 +1,7 @@
 // Menyalin aset frontend ke folder www/ untuk dibungkus Capacitor.
 import { cpSync, rmSync, mkdirSync, readdirSync } from 'node:fs';
 
-const skip = new Set(["src", 'node_modules', 'www', 'android', 'scripts', 'assets', 'resources', 'functions']);
+const skip = new Set(["src", 'node_modules', 'www', 'android', 'scripts', 'assets', 'resources', 'functions', 'desktop']);
 rmSync('www', { recursive: true, force: true });
 mkdirSync('www');
 for (const name of readdirSync('.')) {

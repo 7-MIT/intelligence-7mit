@@ -1,0 +1,107 @@
+name: Desktop Build (Windows & macOS)
+
+# Membangun installer intelligence.7mit 6 Desktop:
+#   Windows x64  -> NSIS .exe
+#   macOS        -> .dmg (Intel x64 + Apple Silicon arm64) + .zip (untuk auto-update)
+# Hasil tersedia sebagai Artifacts; pada tag `desktop-v*` (atau input publish) juga dibuat GitHub Release (draft).
+#
+# Code signing: HANYA bila secrets resmi tersedia (CSC_LINK, CSC_KEY_PASSWORD; APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID).
+# Tanpa secrets, build tidak bertanda tangan dan diberi label jelas. Tidak ada tanda tangan palsu.
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Buat draft GitHub Release dari hasil build
+        type: boolean
+        default: false
+  push:
+    tags: ['desktop-v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            os: windows-latest
+            script: dist:win
+            globs: |
+              desktop/dist/*.exe
+              desktop/dist/*.blockmap
+              desktop/dist/latest.yml
+          - name: macOS (x64 + arm64)
+            os: macos-latest
+            script: dist:mac
+            globs: |
+              desktop/dist/*.dmg
+              desktop/dist/*.zip
+              desktop/dist/*.blockmap
+              desktop/dist/latest-mac.yml
+    env:
+      CSC_LINK: ${{ secrets.CSC_LINK }}
+      CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Build tanpa tanda tangan (secrets tidak tersedia)
+        if: env.CSC_LINK == ''
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run ${{ matrix.script }} -- --publish never
+      - name: Build bertanda tangan
+        if: env.CSC_LINK != ''
+        run: npm run ${{ matrix.script }} -- --publish never
+      - name: Catatan status tanda tangan
+        shell: bash
+        run: |
+          if [ -z "$CSC_LINK" ]; then echo "UNSIGNED — installer tidak bertanda tangan (tidak ada sertifikat resmi di secrets)." | tee dist/SIGNING-STATUS.txt;
+          else echo "SIGNED — ditandatangani dengan sertifikat dari secrets CSC_LINK." | tee dist/SIGNING-STATUS.txt; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: intelligence-7mit-6-desktop-${{ runner.os }}
+          path: |
+            ${{ matrix.globs }}
+            desktop/dist/SIGNING-STATUS.txt
+          if-no-files-found: error
+
+  release:
+    name: Draft GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/desktop-v') || inputs.publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('desktop-v{0}', github.run_number) }}
+          name: intelligence.7mit 6 Desktop ${{ github.ref_name }}
+          body: |
+            Installer intelligence.7mit 6 Desktop.
+            Lihat `SIGNING-STATUS.txt` untuk status tanda tangan. Build tanpa tanda tangan memunculkan peringatan SmartScreen (Windows) / Gatekeeper (macOS); panduan ada di docs/INSTALL.md.
+          files: release/*
