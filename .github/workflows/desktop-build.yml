@@ -17,6 +17,8 @@ on:
         default: false
   push:
     tags: ['desktop-v*']
+    branches: ['claude/gifted-euler-5xt19h']
+    paths: ['desktop/**', '.github/workflows/desktop-build.yml']
 
 permissions:
   contents: read
