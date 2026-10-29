@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { AlertTriangle, Check, Eye, MonitorOff, Pause, Play, Square, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ApprovalActions, ApprovalBody, Composer, Messages, PlanList, StatusPill, Timeline } from '@/components/agent';
@@ -6,26 +6,40 @@ import { ModelBar, capsOf, useCurrentTask } from '@/components/common';
 import { Empty } from '@/components/ui';
 import { pauseTask, resumeTask, respondApproval, setPage, stopTask, store, updatePermissions } from '@/lib/state';
 
-function Preview() {
+/** Kursor AI: panah hitam bergaya (garis abu + cincin putih). Titik tunjuk = ujung kiri-atas. */
+function AgentCursor({ x, y, action }: { x: number; y: number; action: string }) {
+  const d = 'M683 303 L930 385 Q945 392 938 412 Q934 424 925 428 L825 477 L778 583 Q765 600 748 592 Q740 588 738 580 L662 330 Q658 312 683 303 Z';
+  return (
+    <motion.div className="agent-cursor" aria-label={`Kursor AI (${action})`} title={`Kursor AI: ${action}`}
+      initial={false} animate={{ left: `${x}%`, top: `${y}%` }} transition={{ type: 'spring', stiffness: 120, damping: 22, mass: 0.9 }}>
+      <svg viewBox="620 260 360 380" width="34" height="36" style={{ overflow: 'visible', filter: 'drop-shadow(0 3px 6px rgba(0,0,0,.45))' }}>
+        <path d={d} fill="#fff" stroke="#fff" strokeWidth="44" strokeLinejoin="round" />
+        <path d={d} fill="#ccc" stroke="#ccc" strokeWidth="24" strokeLinejoin="round" />
+        <path d={d} fill="#080808" />
+      </svg>
+    </motion.div>
+  );
+}
+
+function Preview({ live, onStop }: { live: boolean; onStop: () => void }) {
   const frame = store.use((s) => s.frame);
   const target = store.use((s) => s.target);
   const capture = store.use((s) => s.capture);
   const [ripple, setRipple] = useState(0);
   useEffect(() => { if (target?.action === 'click' || target?.action === 'drag') setRipple(target.at); }, [target]);
-  const fresh = target && Date.now() - target.at < 6000;
+  const px = target ? (target.x / target.width) * 100 : 0;
+  const py = target ? (target.y / target.height) * 100 : 0;
   return (
     <div className="screen" aria-label="Pratinjau layar langsung">
       {frame ? (
         <div className="screen-inner">
           <img src={frame.dataUrl} alt="Layar komputer saat ini" draggable={false} />
           {capture.active && <div className="scan" />}
-          <AnimatePresence>
-            {fresh && target && (
-              <motion.div key={target.at} className="target" initial={{ scale: 1.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }}
-                style={{ left: `${(target.x / target.width) * 100}%`, top: `${(target.y / target.height) * 100}%` }} title={target.action} />
-            )}
-          </AnimatePresence>
-          {ripple > 0 && target && <div key={ripple} className="ripple" style={{ left: `${(target.x / target.width) * 100}%`, top: `${(target.y / target.height) * 100}%` }} />}
+          {target && ripple > 0 && <div key={ripple} className="ripple" style={{ left: `${px}%`, top: `${py}%` }} />}
+          {live && (
+            <div className="control-pill" role="status"><span className="dot live" />intelligence.7mit sedang mengontrol<button onClick={onStop}>Berhenti</button></div>
+          )}
+          {target && <AgentCursor x={px} y={py} action={target.action} />}
         </div>
       ) : (
         <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 24 }}><MonitorOff size={40} /><p>Belum ada tangkapan layar.<br />Pratinjau muncul saat Control Session berjalan dengan izin Screen observation.</p></div>
@@ -88,7 +102,7 @@ export function ControlPage() {
                 <div className="row"><button className="btn sm" onClick={() => setPage('permissions')}>Buka Permission Center</button><button className="btn sm" onClick={() => setPage('settings')}>Pengaturan penyedia</button></div>
               </div>
             )}
-            <Preview />
+            <Preview live={live} onStop={() => task && stopTask(task.id)} />
           </section>
 
           <section className="ctl-right" aria-label="Aktivitas agen">
