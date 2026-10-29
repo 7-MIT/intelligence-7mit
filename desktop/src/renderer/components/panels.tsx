@@ -1,15 +1,14 @@
-import Editor from '@monaco-editor/react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, ChevronDown, ChevronRight, ExternalLink, File, FileCode2, Folder, GitCommit, Globe, MonitorOff, MonitorSmartphone, Play, Power, RefreshCw, Save, TerminalSquare, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { FileEntry, GitStatus } from '@shared/types';
 import { api, errMsg } from '@/lib/api';
-import '@/lib/monaco';
 import { guard, setPage, store, stopTask, toast, type PanelTab } from '@/lib/state';
 import { DiffView, isLive } from './agent';
 import { capsOf, useActiveProvider, useCurrentTask } from './common';
 import { Tip } from './ui';
 
+const CodeEditor = lazy(() => import('./CodeEditor'));
 const LANG: Record<string, string> = { ts: 'typescript', tsx: 'typescript', js: 'javascript', jsx: 'javascript', json: 'json', md: 'markdown', py: 'python', css: 'css', html: 'html', yml: 'yaml', yaml: 'yaml', rs: 'rust', go: 'go', java: 'java', sh: 'shell', sql: 'sql', xml: 'xml', c: 'c', cpp: 'cpp', h: 'c', cs: 'csharp', rb: 'ruby', php: 'php' };
 const langOf = (p: string) => LANG[p.split('.').pop()?.toLowerCase() ?? ''] ?? 'plaintext';
 
@@ -74,9 +73,9 @@ export function FilesPanel() {
           <span className="spacer" />{cur && <button className="btn sm" style={{ margin: 4 }} onClick={save} disabled={cur.content === cur.saved}><Save size={13} />Simpan</button>}
         </div>
         <div style={{ flex: 1, minHeight: 0 }}>
-          {cur ? <Editor path={cur.path} language={langOf(cur.path)} value={cur.content} theme={dark ? 'it7-dark' : 'vs'} onChange={(v) => setTabs((t) => t.map((x) => (x.path === cur.path ? { ...x, content: v ?? '' } : x)))}
+          {cur ? <Suspense fallback={<div className="empty"><div style={{ color: 'var(--muted)' }}>Memuat editor…</div></div>}><CodeEditor path={cur.path} language={langOf(cur.path)} value={cur.content} theme={dark ? 'it7-dark' : 'vs'} onChange={(v) => setTabs((t) => t.map((x) => (x.path === cur.path ? { ...x, content: v ?? '' } : x)))}
             onMount={(ed, m) => { ed.addCommand(m.KeyMod.CtrlCmd | m.KeyCode.KeyS, () => document.getElementById('save-hidden')?.click()); }}
-            options={{ fontSize: 13, minimap: { enabled: false }, automaticLayout: true, scrollBeyondLastLine: false, fontFamily: 'JetBrains Mono, ui-monospace, Menlo, Consolas, monospace' }} />
+            options={{ fontSize: 13, minimap: { enabled: false }, automaticLayout: true, scrollBeyondLastLine: false, fontFamily: 'JetBrains Mono, ui-monospace, Menlo, Consolas, monospace' }} /></Suspense>
             : <div className="empty"><div style={{ textAlign: 'center', color: 'var(--muted)' }}><FileCode2 size={34} /><p>Pilih berkas dari daftar.</p></div></div>}
           <button id="save-hidden" hidden onClick={save} />
         </div>
