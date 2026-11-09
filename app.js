@@ -6,7 +6,6 @@ const SESSION_KEY = 'intellegence.7mit.session.v1';
 const PROFILE_KEY = 'intellegence.7mit.profile.v1';
 const GUEST_HISTORY_KEY = 'intellegence.7mit.guest-history.v1';
 const THEME_KEY = 'intellegence.7mit.theme';
-const LANGUAGE_KEY = 'intellegence.7mit.language';
 const LOCATION_KEY = 'intellegence.7mit.location.enabled';
 const MAX_ATTACHMENTS = 8;
 const MAX_ATTACHMENT_BYTES = 18 * 1024 * 1024;
@@ -14,7 +13,7 @@ const MAX_ATTACHMENT_BYTES = 18 * 1024 * 1024;
 const I18N = {
   id: {
     brandCaption:'Asisten digital 7 MIT', newChat:'Percakapan baru', search:'Cari riwayat', history:'Riwayat',
-    settings:'Pengaturan', settingsCaption:'Akun, bahasa, dan data', ready:'AI siap digunakan',
+    settings:'Pengaturan', settingsCaption:'Akun dan data', ready:'AI siap digunakan',
     emptyTitle:'Mulai dari <span>mana?</span>', emptyCopy:'Tanyakan pelajaran, kembangkan ide, analisis file, atau minta bantuan menulis.',
     placeholder:'Tanya intelligence.7mit', inputLabel:'Pesan', attach:'Tambahkan file', send:'Kirim pesan',
     privacy:'Jawaban AI dapat keliru. Periksa kembali informasi penting. Histori tersimpan di akunmu.',
@@ -67,7 +66,7 @@ const I18N = {
     }
   }
 };
-let language = localStorage.getItem('7mit-wayyuh.language.v1') === 'en' ? 'en' : 'id';
+let language = 'id';
 const t = key => key.split('.').reduce((value,part)=>value?.[part],I18N[language]) ?? key;
 
 const ICONS = {
@@ -625,4 +624,3 @@ if(localStorage.getItem(THEME_KEY)==='light'||(!localStorage.getItem(THEME_KEY)&
 async function initialize(){if(!session?.access_token&&!session?.guest)return location.replace('/auth/?next=/chat/');hydrateIcons();applyLanguage();void refreshAIVersion();renderAttachmentTray();render();autoResize();const name=profile?.display_name||session.user?.user_metadata?.display_name||session.user?.email?.split('@')[0]||t('you');document.querySelector('.profile-orb').textContent=name.slice(0,1).toUpperCase();$('#settingsLabel').textContent=name;$('#settingsCaption').textContent=isOrganization?'Organization Mode':isGuest?(language==='en'?'Guest · local data':'Tamu · data lokal'):t('settingsCaption');await loadConversations();render();}
 initialize();
 
-window.addEventListener("7mit:languagechange", event => { language = event.detail.language; localStorage.setItem(LANGUAGE_KEY, language); if (document.getElementById("brandCaption")) { applyLanguage(); render(); } });
