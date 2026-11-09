@@ -67,7 +67,7 @@ const I18N = {
     }
   }
 };
-let language = localStorage.getItem(LANGUAGE_KEY) === 'en' ? 'en' : 'id';
+let language = localStorage.getItem('7mit-wayyuh.language.v1') === 'en' ? 'en' : 'id';
 const t = key => key.split('.').reduce((value,part)=>value?.[part],I18N[language]) ?? key;
 
 const ICONS = {
@@ -624,3 +624,5 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&els.sidebar.classLi
 if(localStorage.getItem(THEME_KEY)==='light'||(!localStorage.getItem(THEME_KEY)&&matchMedia('(prefers-color-scheme: light)').matches))document.body.classList.add('light');
 async function initialize(){if(!session?.access_token&&!session?.guest)return location.replace('/auth/?next=/chat/');hydrateIcons();applyLanguage();void refreshAIVersion();renderAttachmentTray();render();autoResize();const name=profile?.display_name||session.user?.user_metadata?.display_name||session.user?.email?.split('@')[0]||t('you');document.querySelector('.profile-orb').textContent=name.slice(0,1).toUpperCase();$('#settingsLabel').textContent=name;$('#settingsCaption').textContent=isOrganization?'Organization Mode':isGuest?(language==='en'?'Guest · local data':'Tamu · data lokal'):t('settingsCaption');await loadConversations();render();}
 initialize();
+
+window.addEventListener("7mit:languagechange", event => { language = event.detail.language; localStorage.setItem(LANGUAGE_KEY, language); if (document.getElementById("brandCaption")) { applyLanguage(); render(); } });
